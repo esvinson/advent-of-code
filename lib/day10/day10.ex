@@ -14,28 +14,38 @@ defmodule Advent.Day10 do
 
   @doc """
   # Example
-  iex> Advent.Day10.determine_angle(5, 5)
-  "R45.0"
+  iex> Advent.Day10.determine_angle(0, 5, 0, 5)
+  135.0
 
-  iex> Advent.Day10.determine_angle(2.5, 5)
-  "R26.575"
+  iex> Advent.Day10.determine_angle(0, 5, 5, 0)
+  45.0
 
-  iex> Advent.Day10.determine_angle(5, 2.5)
-  "R63.425"
+  iex> Advent.Day10.determine_angle(5, 0, 5, 0)
+  315.0
   """
 
-  def determine_angle(0, y) when y > 0, do: "D"
-  def determine_angle(0, _y), do: "U"
-  def determine_angle(x, 0) when x > 0, do: "R"
-  def determine_angle(_x, 0), do: "L"
+  def determine_angle(x1, x2, y1, y2) when x2 == x1 and y2 < y1, do: 0.0
+  def determine_angle(x1, x2, y1, y2) when x2 == x1 and y2 > y1, do: 180.0
+  def determine_angle(x1, x2, y1, y2) when y2 == y1 and x2 > x1, do: 90.0
+  def determine_angle(x1, x2, y1, y2) when y2 == y1 and x2 < x1, do: 270.0
+
+  def determine_angle(x1, x2, y1, y2) when x2 > x1 and y2 > y1,
+    do: 90 + determine_angle(x2 - x1, y2 - y1)
+
+  def determine_angle(x1, x2, y1, y2) when x2 > x1 and y2 < y1,
+    do: determine_angle(x2 - x1, y2 - y1)
+
+  def determine_angle(x1, x2, y1, y2) when x2 < x1 and y2 > y1,
+    do: 180 + determine_angle(x2 - x1, y2 - y1)
+
+  def determine_angle(x1, x2, y1, y2) when x2 < x1 and y2 < y1,
+    do: 270 + determine_angle(x2 - x1, y2 - y1)
 
   def determine_angle(x, y) do
-    angle =
-      :math.atan(x / y)
-      |> radians_to_degrees()
-      |> round_to_x_places(4)
-
-    if x > 0, do: "R#{angle}", else: "L#{angle}"
+    :math.atan(x / y)
+    |> radians_to_degrees()
+    |> round_to_x_places(4)
+    |> abs()
   end
 
   def test0 do
@@ -172,11 +182,11 @@ defmodule Advent.Day10 do
 
   iex> [{1, 2}, {2, 1}, {1, 1}, {0, 1}, {1, 0}] |> Advent.Day10.determine_angles()
   %{
-    "0,1" => ["R-45.0", "R", "R", "R45.0"],
-    "1,0" => ["L-45.0", "D", "R45.0", "D"],
-    "1,1" => ["U", "L", "R", "D"],
-    "1,2" => ["U", "L45.0", "U", "R-45.0"],
-    "2,1" => ["L45.0", "L", "L", "L-45.0"]
+    "0,1" => [45.0, 90.0, 90.0, 135.0],
+    "1,0" => [225.0, 180.0, 135.0, 180.0],
+    "1,1" => [0.0, 270.0, 90.0, 180.0],
+    "1,2" => [0.0, 315.0, 0.0, 45.0],
+    "2,1" => [315.0, 270.0, 270.0, 225.0]
   }
   """
 
@@ -189,7 +199,7 @@ defmodule Advent.Day10 do
         points
         |> Enum.reduce([], fn {x2, y2}, other_acc ->
           if x2 != x || y2 != y do
-            [determine_angle(x2 - x, y2 - y)] ++ other_acc
+            [determine_angle(x, x2, y, y2)] ++ other_acc
           else
             other_acc
           end
