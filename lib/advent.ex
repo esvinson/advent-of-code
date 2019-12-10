@@ -3,16 +3,7 @@ defmodule Advent do
   Documentation for Advent.
   """
 
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Advent.hello()
-      :world
-
-  """
-  def hello do
-    :world
+  def daily_input(day_num) do
+    File.read!("lib/day#{day_num}/day#{day_num}.input")
   end
 end
