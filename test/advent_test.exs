@@ -1,6 +1,7 @@
 defmodule AdventTest do
   use ExUnit.Case
   doctest Advent
+  doctest Advent.Opcodes
   doctest Advent.Day1
   doctest Advent.Day2
   doctest Advent.Day3

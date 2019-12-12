@@ -39,9 +39,6 @@ defmodule Advent.Opcodes do
     end
   end
 
-  # defp operation(opcode, state, instruction_pointer),
-  #   do: operation(opcode, state, [0, 0, 0], instruction_pointer)
-
   defp operation(
          1,
          %{
@@ -309,6 +306,36 @@ defmodule Advent.Opcodes do
     [rem(pms, 10)] ++ param_modes(div(pms, 10), count + 1)
   end
 
+  @doc """
+  # Examples
+
+  iex> Advent.Opcodes.list_to_map([1,0,0,0,99])
+  ...> |> Advent.Opcodes.registers_to_new_state()
+  ...> |> Advent.Opcodes.parse() |> elem(1) |> Map.get(:registers)
+  %{0 => 2, 1 => 0, 2 => 0, 3 => 0, 4 => 99}
+
+  iex> Advent.Opcodes.list_to_map([1101,0,0,0,99])
+  ...> |> Advent.Opcodes.registers_to_new_state()
+  ...> |> Advent.Opcodes.parse() |> elem(1) |> Map.get(:registers)
+  %{0 => 0, 1 => 0, 2 => 0, 3 => 0, 4 => 99}
+
+  iex> Advent.Opcodes.list_to_map([2,3,0,3,99])
+  ...> |> Advent.Opcodes.registers_to_new_state()
+  ...> |> Advent.Opcodes.parse() |> elem(1) |> Map.get(:registers)
+  %{0 => 2, 1 => 3, 2 => 0, 3 => 6, 4 => 99}
+
+  iex> Advent.Opcodes.list_to_map([2,4,4,5,99,0])
+  ...> |> Advent.Opcodes.registers_to_new_state()
+  ...> |> Advent.Opcodes.parse() |> elem(1) |> Map.get(:registers)
+  %{0 => 2, 1 => 4, 2 => 4, 3 => 5, 4 => 99, 5 => 9801}
+
+  iex> Advent.Opcodes.list_to_map([1,1,1,4,99,5,6,0,99])
+  ...> |> Advent.Opcodes.registers_to_new_state()
+  ...> |> Advent.Opcodes.parse() |> elem(1) |> Map.get(:registers)
+  %{0 => 30, 1 => 1, 2 => 1, 3 => 4, 4 => 2, 5 => 5, 6 => 6, 7 => 0, 8 => 99}
+
+  """
+
   def parse(%{registers: registers, instruction_pointer: instruction_pointer} = state) do
     Map.get(registers, instruction_pointer, 0)
     |> case do
@@ -332,6 +359,12 @@ defmodule Advent.Opcodes do
     }
   end
 
+  @doc """
+  # Examples
+
+  iex> Advent.Opcodes.list_to_map([1,0,0,0,99])
+  %{0 => 1, 1 => 0, 2 => 0, 3 => 0, 4 => 99}
+  """
   def list_to_map(lst) do
     Enum.reduce(Enum.with_index(lst), %{}, fn {val, key}, acc ->
       Map.put(acc, key, val)
