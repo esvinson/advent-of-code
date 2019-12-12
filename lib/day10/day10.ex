@@ -168,7 +168,8 @@ defmodule Advent.Day10 do
   @doc """
   # Example
 
-  iex> Advent.Day10.test0 |> Advent.Day10.parse_input()
+  iex> Advent.Day10.test0
+  ...> |> Advent.Day10.parse_input()
   [{1, 2}, {2, 1}, {1, 1}, {0, 1}, {1, 0}]
   """
 
@@ -197,7 +198,8 @@ defmodule Advent.Day10 do
   @doc """
   # Example
 
-  iex> [{1, 2}, {2, 1}, {1, 1}, {0, 1}, {1, 0}] |> Advent.Day10.determine_angles()
+  iex> [{1, 2}, {2, 1}, {1, 1}, {0, 1}, {1, 0}]
+  ...> |> Advent.Day10.determine_angles()
   %{
     "0,1" => [45.0, 90.0, 90.0, 135.0],
     "1,0" => [225.0, 180.0, 135.0, 180.0],
@@ -264,19 +266,29 @@ defmodule Advent.Day10 do
   @doc """
   # Example
 
-  iex> Advent.Day10.test0b() |> Advent.Day10.build_angles() |> Advent.Day10.part1_transform()
+  iex> Advent.Day10.test0b()
+  ...> |> Advent.Day10.build_angles()
+  ...> |> Advent.Day10.part1_transform()
   {"3,4", 8}
 
-  iex> Advent.Day10.test1() |> Advent.Day10.build_angles() |> Advent.Day10.part1_transform()
+  iex> Advent.Day10.test1()
+  ...> |> Advent.Day10.build_angles()
+  ...> |> Advent.Day10.part1_transform()
   {"5,8", 33}
 
-  iex> Advent.Day10.test2() |> Advent.Day10.build_angles() |> Advent.Day10.part1_transform()
+  iex> Advent.Day10.test2()
+  ...> |> Advent.Day10.build_angles()
+  ...> |> Advent.Day10.part1_transform()
   {"1,2", 35}
 
-  iex> Advent.Day10.test3() |> Advent.Day10.build_angles() |> Advent.Day10.part1_transform()
+  iex> Advent.Day10.test3()
+  ...> |> Advent.Day10.build_angles()
+  ...> |> Advent.Day10.part1_transform()
   {"6,3", 41}
 
-  iex> Advent.Day10.test4() |> Advent.Day10.build_angles() |> Advent.Day10.part1_transform()
+  iex> Advent.Day10.test4()
+  ...> |> Advent.Day10.build_angles()
+  ...> |> Advent.Day10.part1_transform()
   {"11,13", 210}
 
   """
@@ -312,7 +324,11 @@ defmodule Advent.Day10 do
 
   @doc """
   # Example
-  iex> Advent.Day10.test4() |> Advent.Day10.build_angles_part2() |> Advent.Day10.part2_transform("11,13") |> Advent.Day10.process_sets(0, []) |> Advent.Day10.get_answer(200)
+  iex> Advent.Day10.test4()
+  ...> |> Advent.Day10.build_angles_part2()
+  ...> |> Advent.Day10.part2_transform("11,13")
+  ...> |> Advent.Day10.process_sets(0, [])
+  ...> |> Advent.Day10.get_answer(200)
   802
   """
 
