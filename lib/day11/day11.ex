@@ -57,7 +57,7 @@ defmodule Advent.Day11 do
     y: 0
   }
   """
-  def paint_surface(state, []), do: state
+  def paint_surface(surface, []), do: surface
 
   def paint_surface(%{x: x, y: y, direction: direction, grid: grid}, [color, turn | remaining]) do
     row = Map.get(grid, y, %{})
@@ -77,12 +77,13 @@ defmodule Advent.Day11 do
       |> Map.get(y, %{})
       |> Map.get(x, 0)
 
-    {status, %{output: [color, turn]} = state} =
+    {status, %{output: [turn, color]} = state} =
       prev_state
       |> Map.put(:input, [current_color])
       |> Opcodes.parse()
 
     new_state = Map.put(state, :output, [])
+
     new_surface = paint_surface(surface, [color, turn])
 
     if status == :halt do
@@ -113,7 +114,7 @@ defmodule Advent.Day11 do
       |> do_work(%{x: 0, y: 0, direction: :up, grid: %{}})
 
     result
-    |> render()
+    |> painted_tiles()
   end
 
   def char(1), do: "#"
@@ -151,7 +152,7 @@ defmodule Advent.Day11 do
         char(Map.get(row, x, 0))
       end)
     end)
-    |> Enum.map(&IO.puts(&1))
+    |> Enum.each(&IO.puts(&1))
 
     # |> Enum.join("\n")
   end

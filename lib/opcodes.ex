@@ -2,7 +2,7 @@ defmodule Advent.Opcodes do
   require Logger
 
   defp get_param(
-         %{registers: registers, relative_base: relative_base},
+         %{registers: registers} = state,
          instruction_pointer,
          params,
          offset
@@ -10,13 +10,13 @@ defmodule Advent.Opcodes do
     Enum.at(params, offset)
     |> case do
       2 ->
-        Map.get(registers, relative_base + Map.get(registers, instruction_pointer, 0))
+        Map.get(registers, get_position_param(state, instruction_pointer, params, offset), 0)
 
       1 ->
-        Map.get(registers, instruction_pointer, 0)
+        get_position_param(state, instruction_pointer, params, offset)
 
       0 ->
-        Map.get(registers, Map.get(registers, instruction_pointer, 0), 0)
+        Map.get(registers, get_position_param(state, instruction_pointer, params, offset), 0)
     end
   end
 
@@ -32,7 +32,7 @@ defmodule Advent.Opcodes do
         relative_base + Map.get(registers, instruction_pointer, 0)
 
       1 ->
-        instruction_pointer
+        Map.get(registers, instruction_pointer, 0)
 
       0 ->
         Map.get(registers, instruction_pointer, 0)
@@ -300,9 +300,41 @@ defmodule Advent.Opcodes do
 
   defp operation(99, state, _), do: {:halt, state}
 
-  defp param_modes(_pms, 4), do: []
+  @doc """
+  # Examples
 
-  defp param_modes(pms, count) do
+  iex> Enum.map(
+  ...> [1, 2, 3, 4, 99, 101, 102, 104, 108, 1001, 1002, 1005, 1006, 1007, 1008, 1106],
+  ...> &Advent.Opcodes.param_modes(&1, 0)
+  ...> )
+  [
+    {1, [0,0,0]},
+    {2, [0,0,0]},
+    {3, [0,0,0]},
+    {4, [0,0,0]},
+    {99, [0,0,0]},
+    {1, [1,0,0]},
+    {2, [1,0,0]},
+    {4, [1,0,0]},
+    {8, [1,0,0]},
+    {1, [0,1,0]},
+    {2, [0,1,0]},
+    {5, [0,1,0]},
+    {6, [0,1,0]},
+    {7, [0,1,0]},
+    {8, [0,1,0]},
+    {6, [1,1,0]}
+  ]
+
+  """
+  def param_modes(_pms, 4), do: []
+
+  def param_modes(code, 0) do
+    opcode = rem(code, 100)
+    {opcode, param_modes(div(code, 100), 1)}
+  end
+
+  def param_modes(pms, count) do
     [rem(pms, 10)] ++ param_modes(div(pms, 10), count + 1)
   end
 
@@ -343,8 +375,7 @@ defmodule Advent.Opcodes do
         code |> operation(state, [0, 0, 0])
 
       code ->
-        opcode = rem(code, 100)
-        pm = code |> div(100) |> param_modes(1)
+        {opcode, pm} = param_modes(code, 0)
         opcode |> operation(state, pm)
     end
   end
@@ -369,5 +400,158 @@ defmodule Advent.Opcodes do
     Enum.reduce(Enum.with_index(lst), %{}, fn {val, key}, acc ->
       Map.put(acc, key, val)
     end)
+  end
+
+  def map_to_list(map) do
+    Map.keys(map)
+    |> Enum.sort()
+    |> Enum.reverse()
+    |> Enum.reduce([], fn x, acc ->
+      [Map.get(map, x)] ++ acc
+    end)
+  end
+
+  @doc """
+  # Examples
+
+  iex> Advent.Opcodes.test_code("1,0,3,5,99")
+  [1, 0, 3, 5, 99, 6]
+
+  iex> Advent.Opcodes.test_code("101,30,4,5,99")
+  [101, 30, 4, 5, 99, 129]
+
+  iex> Advent.Opcodes.test_code("1001,0,15,5,99")
+  [1001, 0, 15, 5, 99, 1016]
+
+  iex> Advent.Opcodes.test_code("1101,18,32,5,99")
+  [1101, 18, 32, 5, 99, 50]
+
+  iex> Advent.Opcodes.test_code("2,0,3,5,99")
+  [2, 0, 3, 5, 99, 10]
+
+  iex> Advent.Opcodes.test_code("102,30,4,5,99")
+  [102, 30, 4, 5, 99, 2970]
+
+  iex> Advent.Opcodes.test_code("1002,0,15,5,99")
+  [1002, 0, 15, 5, 99, 15030]
+
+  iex> Advent.Opcodes.test_code("1102,18,32,5,99")
+  [1102, 18, 32, 5, 99, 576]
+
+  iex> Advent.Opcodes.test_code("3,3,99", [5])
+  [3, 3, 99, 5]
+
+  iex> Advent.Opcodes.test_code("103,3,99", [5])
+  [103, 3, 99, 5]
+
+  iex> Advent.Opcodes.test_code("203,-2", [99], 4)
+  [203, -2, 99]
+
+  iex> Advent.Opcodes.test_output("4,2,99")
+  [99]
+
+  iex> Advent.Opcodes.test_output("104,2,99")
+  [2]
+
+  iex> Advent.Opcodes.test_output("204,0,99", [], 2)
+  [99]
+
+  iex> Advent.Opcodes.test_code("5,0,3,6,2,3,99")
+  [5,0,3,6,2,3,99]
+
+  iex> Advent.Opcodes.test_code("105,85,3,6,2,3,99")
+  [105,85,3,6,2,3,99]
+
+  iex> Advent.Opcodes.test_code("1105,85,6,1,2,3,99")
+  [1105,85,6,1,2,3,99]
+
+  iex> Advent.Opcodes.test_code("1205,0,6,99", [], 5)
+  [1205,0,6,99]
+
+  iex> Advent.Opcodes.test_code("1205,0,6,1,2,3,99", [], 5)
+  [1205,0,6,1,2,3,99]
+
+  iex> Advent.Opcodes.test_code("2205,1,2,3,1,6,99", [], 3)
+  [2205,1,2,3,1,6,99]
+
+  # privided examples day 5
+  iex> Advent.Opcodes.test_output("3,9,8,9,10,9,4,9,99,-1,8", [8])
+  [1]
+
+  iex> Advent.Opcodes.test_output("3,9,8,9,10,9,4,9,99,-1,8", [7])
+  [0]
+
+  iex> Advent.Opcodes.test_output("3,9,7,9,10,9,4,9,99,-1,8", [6])
+  [1]
+
+  iex> Advent.Opcodes.test_output("3,9,7,9,10,9,4,9,99,-1,8", [8])
+  [0]
+
+  iex> Advent.Opcodes.test_output("3,3,1108,-1,8,3,4,3,99", [8])
+  [1]
+
+  iex> Advent.Opcodes.test_output("3,3,1108,-1,8,3,4,3,99", [7])
+  [0]
+
+  iex> Advent.Opcodes.test_output("3,3,1107,-1,8,3,4,3,99", [6])
+  [1]
+
+  iex> Advent.Opcodes.test_output("3,3,1107,-1,8,3,4,3,99", [8])
+  [0]
+
+  iex> Advent.Opcodes.test_output("3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9", [9])
+  [1]
+
+  iex> Advent.Opcodes.test_output("3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9", [0])
+  [0]
+
+  iex> Advent.Opcodes.test_output("3,3,1105,-1,9,1101,0,0,12,4,12,99,1", [9])
+  [1]
+
+  iex> Advent.Opcodes.test_output("3,3,1105,-1,9,1101,0,0,12,4,12,99,1", [0])
+  [0]
+
+  iex> Advent.Opcodes.test_output("3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99", [2])
+  [999]
+
+  iex> Advent.Opcodes.test_output("3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99", [8])
+  [1000]
+
+  iex> Advent.Opcodes.test_output("3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99", [100])
+  [1001]
+
+
+
+  """
+
+  def test_code(instruction, input \\ [], relative_base \\ 0) do
+    {:halt, result} =
+      instruction
+      |> String.split(",", trim: true)
+      |> Enum.map(&String.to_integer/1)
+      |> list_to_map()
+      |> registers_to_new_state()
+      |> Map.put(:input, input)
+      |> Map.put(:relative_base, relative_base)
+      |> parse()
+
+    result
+    |> Map.get(:registers)
+    |> map_to_list()
+  end
+
+  def test_output(instruction, input \\ [], relative_base \\ 0) do
+    {:halt, result} =
+      instruction
+      |> String.split(",", trim: true)
+      |> Enum.map(&String.to_integer/1)
+      |> list_to_map()
+      |> registers_to_new_state()
+      |> Map.put(:input, input)
+      |> Map.put(:relative_base, relative_base)
+      |> parse()
+
+    result
+    |> Map.get(:output)
   end
 end
