@@ -57,14 +57,6 @@ defmodule Advent.Day13 do
 
   def do_work({:halt, _} = state, board), do: {state, board}
 
-  # def do_work(state, %{blocks: 0} = board),
-  #   do:
-  #     {state,
-  #      state
-  #      |> update_board_state_from_output(board)}
-
-  # def do_work({:cont, %{input: []}} = state, board), do: {state, board}
-
   def do_work({_, %{output: output} = state}, board_state) do
     new_board =
       if length(output) == 0 do
