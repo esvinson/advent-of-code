@@ -4,7 +4,7 @@ defmodule Advent.Day16 do
   defp parse_input(input) do
     input
     |> String.trim()
-    |> String.split("", trim: true)
+    |> String.graphemes()
     |> Enum.map(&String.to_integer/1)
   end
 
@@ -112,5 +112,42 @@ defmodule Advent.Day16 do
   def part1 do
     Advent.daily_input(16)
     |> run(100)
+  end
+
+  # value(digit, phase) = value(digit + 1, phase) + value(digit, phase - 1)
+  def calculate(list) do
+    calculate(Enum.reverse(list), [], 0)
+  end
+
+  def calculate([], output, _last_val) do
+    output
+  end
+
+  def calculate([head | tail], output, last_val) do
+    val = rem(head + last_val, 10)
+    calculate(tail, [val | output], val)
+  end
+
+  def run2(input) do
+    offset = Enum.take(input, 7) |> Integer.undigits()
+
+    Stream.cycle(input)
+    |> Stream.drop(offset)
+    |> Enum.take(Enum.count(input) * 10000 - offset)
+    |> Stream.iterate(&calculate/1)
+    |> Enum.at(100)
+    |> Enum.take(8)
+    |> Integer.undigits()
+  end
+
+  def tests2 do
+    84_462_026 = "03036732577212944063491565474664" |> parse_input() |> run2()
+    :ok
+  end
+
+  def part2 do
+    Advent.daily_input(16)
+    |> parse_input()
+    |> run2()
   end
 end
