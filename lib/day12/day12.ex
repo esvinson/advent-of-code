@@ -161,10 +161,7 @@ defmodule Advent.Day12 do
     |> lcm()
   end
 
-  defp gcd(a, 0), do: abs(a)
-  defp gcd(a, b), do: gcd(b, rem(a, b))
-
-  defp lcm(a, b), do: div(abs(a * b), gcd(a, b))
+  defp lcm(a, b), do: div(abs(a * b), Integer.gcd(a, b))
   defp lcm({x, y, z}), do: lcm(x, lcm(y, z))
 
   def part2 do
