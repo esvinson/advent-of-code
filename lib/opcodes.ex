@@ -554,4 +554,11 @@ defmodule Advent.Opcodes do
     result
     |> Map.get(:output)
   end
+
+  def parse_input(input) do
+    input
+    |> String.trim()
+    |> String.split(",")
+    |> Enum.map(&String.to_integer/1)
+  end
 end
