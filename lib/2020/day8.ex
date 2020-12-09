@@ -1,5 +1,5 @@
 defmodule Aoc202008 do
-  defp test_input,
+  def test_input,
     do: """
     nop +0
     acc +1
@@ -12,7 +12,7 @@ defmodule Aoc202008 do
     acc +6
     """
 
-  defp parse_code(input) do
+  def parse_code(input) do
     input
     |> to_string()
     |> String.split("\n", trim: true)
@@ -23,7 +23,7 @@ defmodule Aoc202008 do
     end)
   end
 
-  defp increment_executions(code, offset) do
+  def increment_executions(code, offset) do
     current =
       code
       |> Map.get(offset)
@@ -35,7 +35,7 @@ defmodule Aoc202008 do
     Map.put(code, offset, new)
   end
 
-  defp change_opcode(code, offset, new_opcode) do
+  def change_opcode(code, offset, new_opcode) do
     new =
       code
       |> Map.get(offset)
@@ -44,7 +44,7 @@ defmodule Aoc202008 do
     Map.put(code, offset, new)
   end
 
-  defp execute(code, offset, accumulator \\ 0) do
+  def execute(code, offset, accumulator \\ 0) do
     Map.get(code, offset)
     |> case do
       %{opcode: op, executions: execs, value: val} ->
@@ -68,12 +68,12 @@ defmodule Aoc202008 do
     end
   end
 
-  defp part1(code) do
+  def part1(code) do
     {:infinite, test_result} = execute(code, 0)
     test_result
   end
 
-  defp part2(code) do
+  def part2(code) do
     Map.keys(code)
     |> Enum.reduce_while(nil, fn key, _acc ->
       Map.get(code, key)
@@ -100,23 +100,21 @@ defmodule Aoc202008 do
     end)
   end
 
-  def run do
-    test_code =
-      test_input()
-      |> parse_code()
+  @doc """
+  # Example
+  iex> Aoc202008.test_input() |> Aoc202008.parse_code() |> Aoc202008.part1()
+  5
 
+  iex> Aoc202008.test_input() |> Aoc202008.parse_code() |> Aoc202008.part2()
+  8
+  """
+  def run do
     code =
       Advent.daily_input("2020", "08")
       |> parse_code()
 
-    test_result1 = part1(test_code)
-    IO.puts("Solution to Test Part 1 (Should be 5): #{test_result1}")
-
     result1 = part1(code)
     IO.puts("Solution to Part 1: #{result1}")
-
-    test_result2 = part2(test_code)
-    IO.puts("Solution to Test Part 2 (Should be 8): #{test_result2}")
 
     result2 = part2(code)
     IO.puts("Solution to Part 2: #{result2}")
