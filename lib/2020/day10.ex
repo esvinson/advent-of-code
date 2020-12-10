@@ -88,7 +88,7 @@ defmodule Aoc202010 do
     size = Enum.count(Map.keys(list))
 
     list
-    |> Map.put(-1, 1)
+    |> Map.put(-1, 0)
     |> Map.put(size, list[size - 1] + 3)
     |> traverse(size, %{})
     |> elem(0)
