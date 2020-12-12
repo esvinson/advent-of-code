@@ -95,11 +95,5 @@ defmodule Aoc202012 do
 
     result1 = part1(input)
     IO.puts("Solution to Part 1: #{result1}")
-
-    test_result2 = part2(test_input1)
-    IO.puts("Solution to Test Part 2 (Should be 26): #{test_result2}")
-
-    result2 = part2(input)
-    IO.puts("Solution to Part 2: #{result2}")
   end
 end
