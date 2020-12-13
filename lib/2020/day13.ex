@@ -54,43 +54,6 @@ defmodule Aoc202013 do
     first_bus * wait_time
   end
 
-  def check(buses, timestamp, first_correct, second_correct) do
-    Enum.reduce(buses, {first_correct, second_correct}, fn {val, offset}, {fc, sc} ->
-      if rem(timestamp + offset, val) == 0 do
-        if Map.get(fc, offset, false) == false do
-          {Map.put(fc, offset, timestamp), sc}
-        else
-          if Map.get(sc, offset, false) == false do
-            {fc, Map.put(sc, offset, timestamp)}
-          else
-            {fc, sc}
-          end
-        end
-      else
-        {fc, sc}
-      end
-    end)
-  end
-
-  def traverse(buses, incrementer, timestamp, first_correct, second_correct) do
-    {new_first_correct, new_second_correct} =
-      check(buses, timestamp, first_correct, second_correct)
-
-    bus_count = Enum.count(buses)
-    key_count = Map.keys(new_second_correct) |> Enum.count()
-
-    if bus_count == key_count,
-      do: {new_first_correct, new_second_correct},
-      else:
-        traverse(
-          buses,
-          incrementer,
-          timestamp + incrementer,
-          new_first_correct,
-          new_second_correct
-        )
-  end
-
   defp remainders(buses) do
     Enum.reduce(buses, [], fn {val, index}, acc ->
       acc ++ [val - index]
