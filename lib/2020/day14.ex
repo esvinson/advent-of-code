@@ -21,7 +21,6 @@ defmodule Aoc202014 do
     |> String.pad_leading(36, "0")
   end
 
-  @spec transform([...]) :: {:mask, any} | {:mem, binary, integer}
   def transform(["mask", mask]), do: {:mask, mask}
 
   def transform([mem, value]) do
