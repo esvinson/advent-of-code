@@ -56,83 +56,52 @@ defmodule Advent.Algorithms do
   end
 
   @operators ["+", "*", "/", "-"]
+  @revsere_precedence %{"+" => 3, "-" => 3, "*" => 2, "/" => 2}
 
-  def to_rpn_np([], {output, []}), do: output
+  def to_rpn([], {output, []}, _precedence), do: output
 
-  def to_rpn_np([], {output, [operator | operators]}),
-    do: to_rpn_np([], {[operator | output], operators})
+  def to_rpn([], {output, [operator | operators]}, precedence),
+    do: to_rpn([], {[operator | output], operators}, precedence)
 
-  def to_rpn_np([item | rest], {output, operators}) when is_integer(item),
-    do: to_rpn_np(rest, {[item | output], operators})
+  def to_rpn([item | rest], {output, operators}, precedence) when is_integer(item),
+    do: to_rpn(rest, {[item | output], operators}, precedence)
 
-  def to_rpn_np([item | rest], {output, []}) when item in @operators,
-    do: to_rpn_np(rest, {output, [item]})
+  def to_rpn([item | rest], {output, []}, precedence) when item in @operators,
+    do: to_rpn(rest, {output, [item]}, precedence)
 
-  def to_rpn_np([item | rest], {output, [operator | operators]})
+  def to_rpn([item | rest], {output, [operator | operators]}, :none = precedence)
       when item in @operators and operator in @operators,
-      do: to_rpn_np([item | rest], {[operator | output], operators})
+      do: to_rpn([item | rest], {[operator | output], operators}, precedence)
 
-  def to_rpn_np([item | rest], {output, operators}) when item in @operators,
-    do: to_rpn_np(rest, {output, [item | operators]})
-
-  def to_rpn_np([item | rest], {output, operators}) when item == "(",
-    do: to_rpn_np(rest, {output, [item | operators]})
-
-  def to_rpn_np([item | _rest] = remaining, {output, [operator | operators]})
-      when item == ")" and operator != "(" do
-    to_rpn_np(remaining, {[operator | output], operators})
-  end
-
-  def to_rpn_np([item | rest], {output, [operator | operators]})
-      when item == ")" and operator == "(" do
-    to_rpn_np(rest, {output, operators})
-  end
-
-  # Shunting Yard Algorithm
-  def infix_to_rpn_no_precedence(infix) do
-    to_rpn_np(infix, {[], []}) |> Enum.reverse()
-  end
-
-  @precedence %{"+" => 3, "-" => 3, "*" => 2, "/" => 2}
-
-  def to_rpn_rp([], {output, []}), do: output
-
-  def to_rpn_rp([], {output, [operator | operators]}),
-    do: to_rpn_rp([], {[operator | output], operators})
-
-  def to_rpn_rp([item | rest], {output, operators}) when is_integer(item),
-    do: to_rpn_rp(rest, {[item | output], operators})
-
-  def to_rpn_rp([item | rest], {output, []}) when item in @operators,
-    do: to_rpn_rp(rest, {output, [item]})
-
-  def to_rpn_rp([item | rest], {output, [operator | operators]})
+  def to_rpn([item | rest], {output, [operator | operators]}, :reverse = precedence)
       when item in @operators and operator in @operators do
-    if @precedence[item] <= @precedence[operator] do
-      to_rpn_rp([item | rest], {[operator | output], operators})
+    if @revsere_precedence[item] <= @revsere_precedence[operator] do
+      to_rpn([item | rest], {[operator | output], operators}, precedence)
     else
-      to_rpn_rp(rest, {output, [item, operator | operators]})
+      to_rpn(rest, {output, [item, operator | operators]}, precedence)
     end
   end
 
-  def to_rpn_rp([item | rest], {output, operators}) when item in @operators,
-    do: to_rpn_rp(rest, {output, [item | operators]})
+  def to_rpn([item | rest], {output, operators}, precedence) when item in @operators,
+    do: to_rpn(rest, {output, [item | operators]}, precedence)
 
-  def to_rpn_rp([item | rest], {output, operators}) when item == "(",
-    do: to_rpn_rp(rest, {output, [item | operators]})
+  def to_rpn([item | rest], {output, operators}, precedence) when item == "(",
+    do: to_rpn(rest, {output, [item | operators]}, precedence)
 
-  def to_rpn_rp([item | _rest] = remaining, {output, [operator | operators]})
+  def to_rpn([item | _rest] = remaining, {output, [operator | operators]}, precedence)
       when item == ")" and operator != "(" do
-    to_rpn_rp(remaining, {[operator | output], operators})
+    to_rpn(remaining, {[operator | output], operators}, precedence)
   end
 
-  def to_rpn_rp([item | rest], {output, [operator | operators]})
+  def to_rpn([item | rest], {output, [operator | operators]}, precedence)
       when item == ")" and operator == "(" do
-    to_rpn_rp(rest, {output, operators})
+    to_rpn(rest, {output, operators}, precedence)
   end
 
-  def infix_to_rpn_reverse_precedence(infix) do
-    to_rpn_rp(infix, {[], []}) |> Enum.reverse()
+  # Shunting Yard Algorithm
+  @spec infix_to_rpn(list, :none | :reverse) :: list
+  def infix_to_rpn(infix, precendence) do
+    to_rpn(infix, {[], []}, precendence) |> Enum.reverse()
   end
 
   def rpn_calc([], [stack]), do: stack

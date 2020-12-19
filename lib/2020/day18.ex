@@ -51,7 +51,7 @@ defmodule Aoc202018 do
   def part1(input_list) do
     Enum.map(input_list, fn input ->
       input
-      |> Algorithms.infix_to_rpn_no_precedence()
+      |> Algorithms.infix_to_rpn(:none)
       |> Algorithms.rpn_calc()
     end)
     |> Enum.sum()
@@ -60,7 +60,7 @@ defmodule Aoc202018 do
   def part2(input_list) do
     Enum.map(input_list, fn input ->
       input
-      |> Algorithms.infix_to_rpn_reverse_precedence()
+      |> Algorithms.infix_to_rpn(:reverse)
       |> Algorithms.rpn_calc()
     end)
     |> Enum.sum()
