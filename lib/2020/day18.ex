@@ -15,9 +15,22 @@ defmodule Aoc202018 do
   12240
   iex> ["((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2" |> Aoc202018.parse()] |> Aoc202018.part1()
   13632
+
+  iex> ["1 + 2 * 3 + 4 * 5 + 6" |> Aoc202018.parse()] |> Aoc202018.part2()
+  231
+  iex> ["1 + (2 * 3) + (4 * (5 + 6))" |> Aoc202018.parse()] |> Aoc202018.part2()
+  51
+  iex> ["2 * 3 + (4 * 5)" |> Aoc202018.parse()] |> Aoc202018.part2()
+  46
+  iex> ["5 + (8 * 3 + 9 + 3 * 4 * 3)" |> Aoc202018.parse()] |> Aoc202018.part2()
+  1445
+  iex> ["5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))" |> Aoc202018.parse()] |> Aoc202018.part2()
+  669060
+  iex> ["((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2" |> Aoc202018.parse()] |> Aoc202018.part2()
+  23340
   """
 
-  @operators ["+", "*", "/", "-"]
+  @operators ["+", "*"]
 
   def parse(string) do
     string
@@ -44,12 +57,24 @@ defmodule Aoc202018 do
     |> Enum.sum()
   end
 
+  def part2(input_list) do
+    Enum.map(input_list, fn input ->
+      input
+      |> Algorithms.infix_to_rpn_reverse_precedence()
+      |> Algorithms.rpn_calc()
+    end)
+    |> Enum.sum()
+  end
+
   def run() do
     input_list =
       Advent.daily_input("2020", "18")
       |> String.split("\n", trim: true)
       |> Enum.map(&parse(&1))
 
-    part1(input_list)
+    result1 = part1(input_list)
+    IO.puts("Solution to Part 1: #{result1}")
+    result2 = part2(input_list)
+    IO.puts("Solution to Part 2: #{result2}")
   end
 end
