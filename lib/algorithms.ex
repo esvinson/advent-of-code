@@ -54,4 +54,64 @@ defmodule Advent.Algorithms do
         |> mod(modpi)
     end
   end
+
+  @operators ["+", "*", "/", "-"]
+
+  def to_rpn_np([], {output, []}), do: output
+
+  def to_rpn_np([], {output, [operator | operators]}),
+    do: to_rpn_np([], {[operator | output], operators})
+
+  def to_rpn_np([item | rest], {output, operators}) when is_integer(item),
+    do: to_rpn_np(rest, {[item | output], operators})
+
+  def to_rpn_np([item | rest], {output, []}) when item in @operators,
+    do: to_rpn_np(rest, {output, [item]})
+
+  def to_rpn_np([item | rest], {output, [operator | operators]})
+      when item in @operators and operator in @operators,
+      do: to_rpn_np([item | rest], {[operator | output], operators})
+
+  def to_rpn_np([item | rest], {output, operators}) when item in @operators,
+    do: to_rpn_np(rest, {output, [item | operators]})
+
+  def to_rpn_np([item | rest], {output, operators}) when item == "(",
+    do: to_rpn_np(rest, {output, [item | operators]})
+
+  def to_rpn_np([item | _rest] = remaining, {output, [operator | operators]})
+      when item == ")" and operator != "(" do
+    to_rpn_np(remaining, {[operator | output], operators})
+  end
+
+  def to_rpn_np([item | rest], {output, [operator | operators]})
+      when item == ")" and operator == "(" do
+    to_rpn_np(rest, {output, operators})
+  end
+
+  # Shunting Yard Algorithm
+  def infix_to_rpn_no_precedence(infix) do
+    to_rpn_np(infix, {[], []}) |> Enum.reverse()
+  end
+
+  def rpn_calc([], [stack]), do: stack
+
+  def rpn_calc([left | equation], stack) when is_integer(left),
+    do: rpn_calc(equation, [left | stack])
+
+  def rpn_calc(["+" | equation], [left, right | stack]),
+    do: rpn_calc(equation, [left + right | stack])
+
+  def rpn_calc(["-" | equation], [left, right | stack]),
+    do: rpn_calc(equation, [left - right | stack])
+
+  def rpn_calc(["*" | equation], [left, right | stack]),
+    do: rpn_calc(equation, [left * right | stack])
+
+  def rpn_calc(["/" | equation], [left, right | stack]),
+    do: rpn_calc(equation, [left / right | stack])
+
+  # Reverse Polish Notation Calculator
+  def rpn_calc(equation) do
+    rpn_calc(equation, [])
+  end
 end
