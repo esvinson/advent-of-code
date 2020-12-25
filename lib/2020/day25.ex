@@ -1,31 +1,30 @@
 defmodule Aoc202025 do
+  alias Advent.Algorithms
   def test_input, do: [5_764_801, 17_807_724]
 
   def input, do: [8_421_034, 15_993_936]
 
   @shared_secret 20_201_227
 
-  def recurse(key1, key2, x) do
-    cond do
-      :binary.decode_unsigned(:crypto.mod_pow(7, x, @shared_secret)) == key1 ->
+  def find_loop_size(key1, value, x) do
+    rem(7 * value, @shared_secret)
+    |> case do
+      val when val == key1 ->
         {:key1, x}
 
-      :binary.decode_unsigned(:crypto.mod_pow(7, x, @shared_secret)) == key2 ->
-        {:key2, x}
-
-      true ->
-        recurse(key1, key2, x + 1)
+      val ->
+        find_loop_size(key1, val, x + 1)
     end
   end
 
   def part1([key1, key2]) do
-    recurse(key1, key2, 1)
+    find_loop_size(key1, 1, 1)
     |> case do
       {:key1, x} ->
-        :binary.decode_unsigned(:crypto.mod_pow(key2, x, @shared_secret))
+        Algorithms.powmod(key2, x, @shared_secret)
 
-      {:key2, x} ->
-        :binary.decode_unsigned(:crypto.mod_pow(key1, x, @shared_secret))
+        # {:key2, x} ->
+        #   powmod(key1, x, @shared_secret)
     end
   end
 
