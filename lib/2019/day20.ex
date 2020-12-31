@@ -1,27 +1,4 @@
 defmodule Aoc201920 do
-  def test_input,
-    do: """
-             A
-             A
-      #######.#########
-      #######.........#
-      #######.#######.#
-      #######.#######.#
-      #######.#######.#
-      #####  B    ###.#
-    BC...##  C    ###.#
-      ##.##       ###.#
-      ##...DE  F  ###.#
-      #####    G  ###.#
-      #########.#####.#
-    DE..#######...###.#
-      #.#########.###.#
-    FG..#########.....#
-      ###########.#####
-                 Z
-                 Z
-    """
-
   def parse(input) do
     input
     |> String.split("\n", trim: true)
@@ -107,7 +84,25 @@ defmodule Aoc201920 do
     |> Map.new()
   end
 
+  def inner_or_outer(x, _y, _max_x, _max_y) when x <= 2, do: :outer
+  def inner_or_outer(_x, y, _max_x, _max_y) when y <= 2, do: :outer
+  def inner_or_outer(x, _y, max_x, _max_y) when x >= max_x - 2, do: :outer
+  def inner_or_outer(_x, y, _max_x, max_y) when y >= max_y - 2, do: :outer
+  def inner_or_outer(_, _, _, _), do: :inner
+
   def link_portals(map) do
+    max_x =
+      map
+      |> Enum.map(fn {key, _value} -> key end)
+      |> Enum.max(fn {x1, _y1}, {x2, _y2} -> x1 > x2 end)
+      |> elem(0)
+
+    max_y =
+      map
+      |> Enum.map(fn {key, _value} -> key end)
+      |> Enum.max(fn {_x1, y1}, {_x2, y2} -> y1 > y2 end)
+      |> elem(1)
+
     map
     |> Enum.reduce(%{}, fn {position, neighbors}, acc ->
       portal =
@@ -134,13 +129,16 @@ defmodule Aoc201920 do
           nil ->
             []
 
-          {:portal, portal, at} ->
+          {:portal, portal, {x, y} = at} ->
             Enum.find(map, fn {destination, neighbors} ->
               Enum.member?(neighbors, {:portal, portal, destination}) && at != destination
             end)
             |> case do
-              {destination, _neighbors} -> [destination]
-              result -> {:error, "No portal destination found", result}
+              {destination, _neighbors} ->
+                [{:portal, inner_or_outer(x, y, max_x, max_y), destination}]
+
+              result ->
+                {:error, "No portal destination found", result}
             end
         end
         |> Enum.concat(not_portals)
@@ -170,6 +168,7 @@ defmodule Aoc201920 do
   def traverse(
         %{end: final, map: map} = maze,
         queue,
+        recurse,
         visited \\ MapSet.new()
       ) do
     Advent.dequeue(queue)
@@ -177,36 +176,88 @@ defmodule Aoc201920 do
       :empty ->
         {:error, "Ran out of work"}
 
-      {x, y, depth} ->
+      {x, y, level, steps} ->
         current_position = {x, y}
 
         cond do
-          current_position == final ->
-            depth
+          current_position == final && level == 0 ->
+            steps
 
           true ->
-            new_visited = MapSet.put(visited, current_position)
+            new_visited = MapSet.put(visited, {x, y, level})
 
             map
             |> Map.get(current_position)
             |> Enum.reject(&(&1 in [:start, :end]))
-            |> Enum.reject(&MapSet.member?(visited, &1))
+            |> Enum.reject(fn point ->
+              key =
+                point
+                |> case do
+                  {:portal, :outer, pt} ->
+                    pt
+                    |> Tuple.append(level - 1)
+
+                  {:portal, :inner, pt} ->
+                    pt
+                    |> Tuple.append(level + 1)
+
+                  _ ->
+                    point
+                    |> Tuple.append(level)
+                end
+
+              MapSet.member?(visited, key)
+            end)
             |> case do
               [] ->
                 nil
 
               neighbors ->
                 Enum.each(neighbors, fn neighbor ->
-                  Advent.enqueue(queue, Tuple.append(neighbor, depth + 1))
+                  neighbor
+                  |> case do
+                    {:portal, inner_outer, portal_to} ->
+                      cond do
+                        not recurse ->
+                          Advent.enqueue(
+                            queue,
+                            Tuple.append(Tuple.append(portal_to, level), steps + 1)
+                          )
+
+                        true ->
+                          cond do
+                            inner_outer == :outer && level == 0 ->
+                              :noop
+
+                            inner_outer == :outer ->
+                              Advent.enqueue(
+                                queue,
+                                Tuple.append(Tuple.append(portal_to, level - 1), steps + 1)
+                              )
+
+                            inner_outer == :inner ->
+                              Advent.enqueue(
+                                queue,
+                                Tuple.append(Tuple.append(portal_to, level + 1), steps + 1)
+                              )
+                          end
+                      end
+
+                    _ ->
+                      Advent.enqueue(
+                        queue,
+                        Tuple.append(Tuple.append(neighbor, level), steps + 1)
+                      )
+                  end
                 end)
             end
 
-            traverse(maze, queue, new_visited)
+            traverse(maze, queue, recurse, new_visited)
         end
     end
   end
 
-  def do_work(input) do
+  def do_work(input, recurse \\ false) do
     queue = Advent.start_queue_agent()
 
     clean_map =
@@ -217,14 +268,14 @@ defmodule Aoc201920 do
       |> link_portals()
       |> find_start_end()
 
-    Advent.enqueue(queue, Tuple.append(clean_map.start, 0))
+    Advent.enqueue(queue, Tuple.append(Tuple.append(clean_map.start, 0), 0))
 
     clean_map
-    |> traverse(queue)
+    |> traverse(queue, recurse)
   end
 
   def test1_part1 do
-    test_input()
+    Advent.daily_input("2019", "20-t1")
     |> do_work()
   end
 
@@ -233,14 +284,32 @@ defmodule Aoc201920 do
     |> do_work()
   end
 
+  def test1_part2 do
+    Advent.daily_input("2019", "20-t1")
+    |> do_work(true)
+  end
+
+  def test2_part2 do
+    Advent.daily_input("2019", "20-t3")
+    |> do_work(true)
+  end
+
   def part1 do
     Advent.daily_input("2019", "20")
     |> do_work()
+  end
+
+  def part2 do
+    Advent.daily_input("2019", "20")
+    |> do_work(true)
   end
 
   def run do
     Advent.output(&test1_part1/0, "Test Part 1 Result (Should be 23): ")
     Advent.output(&test2_part1/0, "Test Part 1 Result (Should be 58): ")
     Advent.output(&part1/0, "Part 1 Result: ")
+    Advent.output(&test1_part2/0, "Test Part 2 Result (Should be 26): ")
+    Advent.output(&test2_part2/0, "Test Part 2 Result (Should be 396): ")
+    Advent.output(&part2/0, "Part 2 Result: ")
   end
 end
