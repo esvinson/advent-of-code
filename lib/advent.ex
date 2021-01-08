@@ -58,3 +58,64 @@ defmodule Advent do
     end
   end
 end
+
+defmodule Advent.WeightedQueue do
+  use Agent
+
+  def start_link() do
+    Agent.start_link(fn -> Heap.new() end, name: __MODULE__)
+  end
+
+  def clear() do
+    Agent.update(__MODULE__, fn _stack -> Heap.new() end)
+  end
+
+  def enqueue(value) do
+    :ok = Agent.update(__MODULE__, fn heap -> Heap.push(heap, value) end)
+  end
+
+  def dequeue() do
+    Agent.get(__MODULE__, fn heap -> Heap.root(heap) end)
+    |> case do
+      nil ->
+        :empty
+
+      val ->
+        Agent.update(__MODULE__, fn heap -> Heap.pop(heap) end)
+
+        val
+    end
+  end
+
+  def depth() do
+    Agent.get(__MODULE__, fn heap -> Heap.size(heap) end)
+  end
+end
+
+defmodule Advent.Stack do
+  use Agent
+
+  def start_link(initial_value) do
+    Agent.start_link(fn -> initial_value end, name: __MODULE__)
+  end
+
+  def add(value) do
+    :ok = Agent.update(__MODULE__, fn stack -> [value | stack] end)
+  end
+
+  def depth() do
+    Agent.get(__MODULE__, fn stack -> length(stack) end)
+  end
+
+  defp pop_fn([]), do: :empty
+  defp pop_fn([val | _rest]), do: val
+  defp pop_update_fn([]), do: []
+  defp pop_update_fn([_val | rest]), do: rest
+
+  def pop() do
+    value = Agent.get(__MODULE__, &pop_fn/1)
+    Agent.update(__MODULE__, &pop_update_fn/1)
+
+    value
+  end
+end
