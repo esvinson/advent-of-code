@@ -40,20 +40,20 @@ defmodule Advent.Day14 do
     {final_stock, ore_count} =
       requires
       |> Enum.reduce({stock, 0}, fn {type, needed}, {current_stock, total} ->
-        actual_neded = multiplier * needed
+        actual_needed = multiplier * needed
 
-        if has_enough_stock?(current_stock, type, actual_neded) do
-          {remove_stock(current_stock, type, actual_neded), total}
+        if has_enough_stock?(current_stock, type, actual_needed) do
+          {remove_stock(current_stock, type, actual_needed), total}
         else
           {updated_stock, subtotal} =
             get_requirements(
               recipes,
               type,
-              actual_neded - current_stock(current_stock, type),
+              actual_needed - current_stock(current_stock, type),
               current_stock
             )
 
-          {updated_stock |> remove_stock(type, actual_neded), subtotal + total}
+          {updated_stock |> remove_stock(type, actual_needed), subtotal + total}
         end
       end)
 
