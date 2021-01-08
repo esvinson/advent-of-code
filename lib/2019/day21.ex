@@ -52,8 +52,6 @@ defmodule Aoc201921 do
       OR T J
       NOT C T
       OR T J
-      NOT C T
-      OR T J
       AND D J
       NOT E T
       NOT T T
@@ -69,11 +67,7 @@ defmodule Aoc201921 do
   end
 
   def run do
-    # Advent.output(&test1_part1/0, "Test Part 1 Result (Should be 23): ")
-    # Advent.output(&test2_part1/0, "Test Part 1 Result (Should be 58): ")
     Advent.output(&part1/0, "Part 1 Result: ")
-    # Advent.output(&test1_part2/0, "Test Part 2 Result (Should be 26): ")
-    # Advent.output(&test2_part2/0, "Test Part 2 Result (Should be 396): ")
     Advent.output(&part2/0, "Part 2 Result: ")
   end
 end
