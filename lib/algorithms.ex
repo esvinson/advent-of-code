@@ -136,4 +136,8 @@ defmodule Advent.Algorithms do
     k = div(k, 2)
     powmod(n, k, m, r)
   end
+
+  def inverse(map) do
+    for {k, v} <- map, into: %{}, do: {v, k}
+  end
 end

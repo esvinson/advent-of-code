@@ -66,7 +66,7 @@ defmodule Aoc202106 do
     do: run_part2({one, two, three, four, five, six, seven + zero, eight, zero}, step - 1)
 
   def part2(initial_fish) do
-    initial_state = for(_ <- 0..8, do: 0) |> List.to_tuple()
+    initial_state = Tuple.duplicate(0, 9)
 
     initial_fish
     |> bucket(initial_state)
