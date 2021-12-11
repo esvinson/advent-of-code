@@ -66,35 +66,11 @@ defmodule Aoc202109 do
   defp update_bucket({_, _, bucket} = state, {_x, _y} = position),
     do: put_in(state, [Access.elem(1), position], bucket)
 
-  defp traverse(state, _map, _map_size, nil, []), do: state
+  defp traverse(state, _map, _map_size, []), do: state
 
-  defp traverse(state, map, map_size, position, []) do
+  defp traverse(state, map, map_size, [position | rest]) do
     if visited?(state, map, position) or value(map, position) == 9 do
-      traverse(state, map, map_size, nil, [])
-    else
-      state =
-        state
-        |> visit(position)
-        |> update_bucket(position)
-
-      new_queue =
-        map_size
-        |> neighbors(position)
-        |> Enum.filter(&(not visited?(state, map, &1)))
-
-      {new_next, new_rest} =
-        case new_queue do
-          [next | rest] -> {next, rest}
-          [] -> {nil, []}
-        end
-
-      traverse(state, map, map_size, new_next, new_rest)
-    end
-  end
-
-  defp traverse(state, map, map_size, position, [next | rest]) do
-    if visited?(state, map, position) or value(map, position) == 9 do
-      traverse(state, map, map_size, next, rest)
+      traverse(state, map, map_size, rest)
     else
       state =
         state
@@ -110,7 +86,7 @@ defmodule Aoc202109 do
           neigh -> rest ++ neigh
         end
 
-      traverse(state, map, map_size, next, new_queue)
+      traverse(state, map, map_size, new_queue)
     end
   end
 
@@ -137,23 +113,17 @@ defmodule Aoc202109 do
       if visited?(state, map, position) do
         state
       else
-        initial_queue =
-          neighbors({max_cols, max_rows}, position)
-          |> Enum.filter(&(not visited?(state, map, &1)))
-
-        traverse(state, map, {max_cols, max_rows}, position, initial_queue)
+        traverse(state, map, {max_cols, max_rows}, [position])
         |> increment_bucket()
       end
     end)
     |> elem(1)
     |> Map.values()
     |> Enum.frequencies()
-    |> Enum.sort(fn {_k, v}, {_k2, v2} -> v2 < v end)
+    |> Map.values()
+    |> Enum.sort(fn v, v2 -> v2 < v end)
     |> Enum.take(3)
-    |> Enum.map(fn {_k, v} -> v end)
-    |> Enum.reduce(nil, fn x, acc ->
-      if is_nil(acc), do: x, else: acc * x
-    end)
+    |> Enum.reduce(1, fn x, acc -> acc * x end)
   end
 
   def run do
