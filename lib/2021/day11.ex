@@ -75,8 +75,25 @@ defmodule Aoc202111 do
     |> step(100, 0)
   end
 
-  def part2(rows) do
-    rows
+  def step(map, steps) do
+    queue = for x <- 0..9, y <- 0..9, do: {x, y}
+
+    {map, count} =
+      map
+      |> increment(queue)
+      |> reset_and_count()
+
+    if count != 100 do
+      step(map, steps + 1)
+    else
+      steps
+    end
+  end
+
+  def part2(map) do
+    map
+    |> initialize()
+    |> step(1)
   end
 
   def run do
@@ -90,7 +107,7 @@ defmodule Aoc202111 do
 
     IO.puts("Test Answer Part 1: #{inspect(part1(test_input))}")
     IO.puts("Part 1: #{inspect(part1(input))}")
-    # IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
-    # IO.puts("Part 2: #{inspect(part2(input))}")
+    IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
+    IO.puts("Part 2: #{inspect(part2(input))}")
   end
 end
