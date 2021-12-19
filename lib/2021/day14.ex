@@ -52,7 +52,6 @@ defmodule Aoc202114 do
       |> Enum.chunk_every(2, 1, ["0"])
       |> Enum.frequencies()
 
-    # [a | rest] =
     {{_, min}, {_, max}} =
       Enum.reduce(0..39, chain, fn _, chain ->
         Enum.reduce(chain, %{}, fn {[a, b], count}, acc ->
