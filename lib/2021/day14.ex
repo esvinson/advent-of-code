@@ -45,8 +45,36 @@ defmodule Aoc202114 do
     a - b
   end
 
-  def part2(initial) do
-    initial
+  def part2({start, mapping}) do
+    chain =
+      start
+      |> String.split("", trim: true)
+      |> Enum.chunk_every(2, 1, ["0"])
+      |> Enum.frequencies()
+
+    # [a | rest] =
+    {{_, min}, {_, max}} =
+      Enum.reduce(0..39, chain, fn _, chain ->
+        Enum.reduce(chain, %{}, fn {[a, b], count}, acc ->
+          key = a <> b
+
+          case mapping do
+            %{^key => add} ->
+              acc
+              |> Map.update([a, add], count, &(&1 + count))
+              |> Map.update([add, b], count, &(&1 + count))
+
+            %{} ->
+              Map.put(acc, [a, b], count)
+          end
+        end)
+      end)
+      |> Enum.reduce(%{}, fn {[a, _b], count}, acc ->
+        Map.update(acc, a, count, &(&1 + count))
+      end)
+      |> Enum.min_max_by(fn {_, x} -> x end)
+
+    max - min
   end
 
   def run do
@@ -60,7 +88,7 @@ defmodule Aoc202114 do
 
     IO.puts("Test Answer Part 1: #{inspect(part1(test_input))}")
     IO.puts("Part 1: #{inspect(part1(input))}")
-    # IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
-    # IO.puts("Part 2: #{inspect(part2(input))}")
+    IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
+    IO.puts("Part 2: #{inspect(part2(input))}")
   end
 end
