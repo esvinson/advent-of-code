@@ -1,28 +1,50 @@
 defmodule Aoc202202 do
+  @alpha_rock "A"
+  @alpha_paper "B"
+  @alpha_scissors "C"
+  @rock 1
+  @paper 2
+  @scissors 3
+  @win 6
+  @lose 0
+  @draw 3
+
   def parse(input) do
     input
     |> String.split("\n", trim: true)
     |> Enum.map(&String.split(&1, " ", trim: true))
   end
 
-  def do_round(["A", "X"]), do: 1 + 3
-  def do_round(["A", "Y"]), do: 2 + 6
-  def do_round(["A", "Z"]), do: 3 + 0
-  def do_round(["B", "X"]), do: 1 + 0
-  def do_round(["B", "Y"]), do: 2 + 3
-  def do_round(["B", "Z"]), do: 3 + 6
-  def do_round(["C", "X"]), do: 1 + 6
-  def do_round(["C", "Y"]), do: 2 + 0
-  def do_round(["C", "Z"]), do: 3 + 3
+  def part1_round([@alpha_rock, "X"]), do: @rock + @draw
+  def part1_round([@alpha_rock, "Y"]), do: @paper + @win
+  def part1_round([@alpha_rock, "Z"]), do: @scissors + @lose
+  def part1_round([@alpha_paper, "X"]), do: @rock + @lose
+  def part1_round([@alpha_paper, "Y"]), do: @paper + @draw
+  def part1_round([@alpha_paper, "Z"]), do: @scissors + @win
+  def part1_round([@alpha_scissors, "X"]), do: @rock + @win
+  def part1_round([@alpha_scissors, "Y"]), do: @paper + @lose
+  def part1_round([@alpha_scissors, "Z"]), do: @scissors + @draw
 
   def part1(rounds) do
     rounds
-    |> Enum.map(&do_round(&1))
+    |> Enum.map(&part1_round(&1))
     |> Enum.sum()
   end
 
-  def part2(inventory) do
-    inventory
+  def part2_round([@alpha_rock, "X"]), do: @scissors + @lose
+  def part2_round([@alpha_rock, "Y"]), do: @rock + @draw
+  def part2_round([@alpha_rock, "Z"]), do: @paper + @win
+  def part2_round([@alpha_paper, "X"]), do: @rock + @lose
+  def part2_round([@alpha_paper, "Y"]), do: @paper + @draw
+  def part2_round([@alpha_paper, "Z"]), do: @scissors + @win
+  def part2_round([@alpha_scissors, "X"]), do: @paper + @lose
+  def part2_round([@alpha_scissors, "Y"]), do: @scissors + @draw
+  def part2_round([@alpha_scissors, "Z"]), do: @rock + @win
+
+  def part2(rounds) do
+    rounds
+    |> Enum.map(&part2_round(&1))
+    |> Enum.sum()
   end
 
   def run do
@@ -40,7 +62,7 @@ defmodule Aoc202202 do
 
     IO.puts("Test Answer Part 1: #{inspect(part1(test_input))}")
     IO.puts("Part 1: #{inspect(part1(input))}")
-    # IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
-    # IO.puts("Part 2: #{inspect(part2(input))}")
+    IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
+    IO.puts("Part 2: #{inspect(part2(input))}")
   end
 end
