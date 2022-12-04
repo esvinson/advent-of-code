@@ -2,20 +2,22 @@ defmodule Aoc202204 do
   def parse(input) do
     input
     |> String.split("\n", trim: true)
-  end
-
-  def part1(assignments) do
-    assignments
-    |> Enum.reduce(0, fn set, acc ->
+    |> Enum.map(fn sets ->
       [left, right] =
-        set
+        sets
         |> String.split(",", trim: true)
 
       [start, stop] = String.split(left, "-", trim: true) |> Enum.map(&String.to_integer/1)
       first = MapSet.new(Range.new(start, stop))
       [start, stop] = String.split(right, "-", trim: true) |> Enum.map(&String.to_integer/1)
       second = MapSet.new(Range.new(start, stop))
+      {first, second}
+    end)
+  end
 
+  def part1(assignments) do
+    assignments
+    |> Enum.reduce(0, fn {first, second}, acc ->
       if MapSet.subset?(first, second) or MapSet.subset?(second, first) do
         acc + 1
       else
@@ -26,16 +28,7 @@ defmodule Aoc202204 do
 
   def part2(assignments) do
     assignments
-    |> Enum.reduce(0, fn set, acc ->
-      [left, right] =
-        set
-        |> String.split(",", trim: true)
-
-      [start, stop] = String.split(left, "-", trim: true) |> Enum.map(&String.to_integer/1)
-      first = MapSet.new(Range.new(start, stop))
-      [start, stop] = String.split(right, "-", trim: true) |> Enum.map(&String.to_integer/1)
-      second = MapSet.new(Range.new(start, stop))
-
+    |> Enum.reduce(0, fn {first, second}, acc ->
       if MapSet.disjoint?(first, second) do
         acc
       else
