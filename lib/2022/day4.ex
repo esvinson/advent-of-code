@@ -26,6 +26,22 @@ defmodule Aoc202204 do
 
   def part2(assignments) do
     assignments
+    |> Enum.reduce(0, fn set, acc ->
+      [left, right] =
+        set
+        |> String.split(",", trim: true)
+
+      [start, stop] = String.split(left, "-", trim: true) |> Enum.map(&String.to_integer/1)
+      first = MapSet.new(Range.new(start, stop))
+      [start, stop] = String.split(right, "-", trim: true) |> Enum.map(&String.to_integer/1)
+      second = MapSet.new(Range.new(start, stop))
+
+      if MapSet.disjoint?(first, second) do
+        acc
+      else
+        acc + 1
+      end
+    end)
   end
 
   def run do
@@ -46,7 +62,7 @@ defmodule Aoc202204 do
 
     IO.puts("Test Answer Part 1: #{inspect(part1(test_input))}")
     IO.puts("Part 1: #{inspect(part1(input))}")
-    # IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
-    # IO.puts("Part 2: #{inspect(part2(input))}")
+    IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
+    IO.puts("Part 2: #{inspect(part2(input))}")
   end
 end
