@@ -32,12 +32,35 @@ defmodule Aoc202205 do
 
   def part1(start, movement) do
     run_movement(start, movement)
-    |> IO.inspect()
+    # |> IO.inspect()
     |> Enum.map(fn {_, [first | _rest]} -> first end)
   end
 
-  # def part2(start, movement) do
-  # end
+  defp move2(state, count, source, destination) do
+    tmp = Map.get(state, source)
+    {val, rest} = String.split_at(tmp, count)
+
+    state
+    |> Map.update(source, rest, fn _ -> rest end)
+    |> Map.update(destination, val, fn current -> val <> current end)
+  end
+
+  defp run_movement2(state, []), do: state
+
+  defp run_movement2(state, [{count, source, destination} | rest]) do
+    new_state = move2(state, count, source, destination)
+    run_movement2(new_state, rest)
+  end
+
+  def part2(start, movement) do
+    start
+    |> Enum.map(fn {key, val} -> {key, to_string(val)} end)
+    |> Map.new()
+    |> run_movement2(movement)
+    # |> IO.inspect()
+    |> Enum.map(fn {_, chars} -> String.first(chars) end)
+    |> Enum.join()
+  end
 
   def run do
     #     [D]
@@ -77,7 +100,7 @@ defmodule Aoc202205 do
 
     IO.puts("Test Answer Part 1: #{inspect(part1(test_start, test_input))}")
     IO.puts("Part 1: #{inspect(part1(start, input))}")
-    # IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
-    # IO.puts("Part 2: #{inspect(part2(input))}")
+    IO.puts("Test Answer Part 2: #{inspect(part2(test_start, test_input))}")
+    IO.puts("Part 2: #{inspect(part2(start, input))}")
   end
 end
