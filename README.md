@@ -1,10 +1,4 @@
 # Advent of Code
-Running: (Old)
-```
-iex -S mix
-iex> Advent.Day#.part1
-iex> Advent.Day#.part2
-```
 
 Running: (2019)
 ```
