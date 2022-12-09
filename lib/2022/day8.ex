@@ -86,9 +86,49 @@ defmodule Aoc202208 do
     |> Enum.count()
   end
 
-  # def part2(start) do
-  #   start
-  # end
+  def view_score([], _map, _current_value, trees), do: trees
+
+  def view_score([visit | rest], map, current_value, trees) do
+    new_value = Map.get(map, visit)
+
+    if new_value >= current_value do
+      trees + 1
+    else
+      view_score(rest, map, current_value, trees + 1)
+    end
+  end
+
+  def calculate_score({x, y}, {cols, rows}, map) do
+    current_value = Map.get(map, {x, y})
+
+    visit_left = for i <- (x - 1)..0, do: {i, y}
+    visit_right = for i <- (x + 1)..(cols - 1), do: {i, y}
+    visit_up = for j <- (y - 1)..0, do: {x, j}
+    visit_down = for j <- (y + 1)..(rows - 1), do: {x, j}
+
+    view_score(visit_left, map, current_value, 0) * view_score(visit_right, map, current_value, 0) *
+      view_score(visit_up, map, current_value, 0) * view_score(visit_down, map, current_value, 0)
+  end
+
+  def do_it2([], _size, _map, result), do: result
+
+  def do_it2([{x, y} | queue], size, map, result) do
+    score = calculate_score({x, y}, size, map)
+
+    do_it2(queue, size, map, [score] ++ result)
+  end
+
+  def part2(%{rows: rows, cols: cols, map: map}) do
+    # Edges aren't necessary to check because anything x 0 is 0.
+    positions =
+      for x <- 1..(cols - 2),
+          y <- 1..(rows - 2),
+          do: {x, y}
+
+    positions
+    |> do_it2({cols, rows}, map, [])
+    |> Enum.max()
+  end
 
   def run do
     test_input =
@@ -105,7 +145,7 @@ defmodule Aoc202208 do
 
     IO.puts("Test Answer Part 1: #{inspect(part1(test_input))}")
     IO.puts("Part 1: #{inspect(part1(input))}")
-    # IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
-    # IO.puts("Part 2: #{inspect(part2(input))}")
+    IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
+    IO.puts("Part 2: #{inspect(part2(input))}")
   end
 end
