@@ -65,6 +65,25 @@ defmodule Aoc202213 do
     |> Enum.reduce(0, fn {index, _}, acc -> acc + index end)
   end
 
+  def part2(sets) do
+    sets =
+      Enum.reduce(sets, [], fn x, acc ->
+        [a, b] = x
+        [a, b] ++ acc
+      end)
+
+    result =
+      ([[[2]], [[6]]] ++ sets)
+      |> Enum.sort(fn a, b ->
+        {_, val} = valid?(a, b)
+        val
+      end)
+
+    two = Enum.find_index(result, fn x -> x == [[2]] end)
+    six = Enum.find_index(result, fn x -> x == [[6]] end)
+    (two + 1) * (six + 1)
+  end
+
   def run do
     test_input =
       """
@@ -98,7 +117,7 @@ defmodule Aoc202213 do
 
     IO.puts("Test Answer Part 1: #{inspect(part1(test_input))}")
     IO.puts("Part 1: #{inspect(part1(input))}")
-    # IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
-    # IO.puts("Part 2: #{inspect(part2(input))}")
+    IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
+    IO.puts("Part 2: #{inspect(part2(input))}")
   end
 end
