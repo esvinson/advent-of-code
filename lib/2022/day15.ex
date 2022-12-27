@@ -30,40 +30,60 @@ defmodule Aoc202215 do
       |> Enum.map(fn {key, val} -> {key, distance(key, val)} end)
       |> Map.new()
 
-    beacons =
-      Enum.reduce(sensors, MapSet.new(), fn {_key, beacon}, acc -> MapSet.put(acc, beacon) end)
-
-    %{min: min, max: max, max_dist: max_dist} =
-      Enum.reduce(ranges, %{min: :infinity, max: 0, max_dist: 0}, fn {{x, _y}, dist},
-                                                                     %{
-                                                                       min: min,
-                                                                       max: max,
-                                                                       max_dist: max_dist
-                                                                     } ->
-        min = if x < min, do: x, else: min
-        max = if x > max, do: x, else: max
-
-        max_dist = if dist > max_dist, do: dist, else: max_dist
-        %{min: min, max: max, max_dist: max_dist}
-      end)
-
-    (min - max_dist)..(max + max_dist)
-    |> Enum.reduce(MapSet.new(), fn x, total ->
-      cur_pos = {x, check_y}
-
-      Enum.reduce(ranges, total, fn {sensor, sensor_dist}, acc ->
-        if distance(cur_pos, sensor) <= sensor_dist and not MapSet.member?(beacons, cur_pos) do
-          MapSet.put(acc, cur_pos)
-        else
-          acc
-        end
-      end)
-    end)
-    |> MapSet.size()
+    [{x, y}] = get_ranges(ranges, check_y)
+    abs(x - y)
   end
 
-  def part2(sensors) do
-    sensors
+  def combine_ranges([{x1, x2}]), do: [{x1, x2}]
+
+  def combine_ranges([{x1, x2}, {x3, x4} | rest]) do
+    cond do
+      x2 + 1 < x3 -> [{x1, x2}] ++ combine_ranges([{x3, x4}] ++ rest)
+      x2 >= x4 -> combine_ranges([{x1, x2}] ++ rest)
+      true -> combine_ranges([{x1, x4}] ++ rest)
+    end
+  end
+
+  def get_ranges(ranges, cur_y) do
+    Enum.reduce(ranges, [], fn {{x, y}, dist}, acc ->
+      remaining = dist - abs(y - cur_y)
+      if remaining >= 0, do: [{x - remaining, x + remaining}] ++ acc, else: acc
+    end)
+    |> Enum.sort()
+    |> combine_ranges()
+  end
+
+  def clamp([], _size), do: []
+
+  def clamp([{x1, x2} | rest], size) do
+    if x2 < 0 do
+      clamp(rest, size)
+    else
+      if x1 > size do
+        clamp(rest, size)
+      else
+        [{max(x1, 0), min(size, x2)}] ++ clamp(rest, size)
+      end
+    end
+  end
+
+  def part2(sensors, size) do
+    ranges =
+      sensors
+      |> Enum.map(fn {key, val} -> {key, distance(key, val)} end)
+      |> Map.new()
+
+    Enum.reduce_while(0..size, nil, fn cur_y, _acc ->
+      sets = get_ranges(ranges, cur_y) |> clamp(size)
+
+      if length(sets) == 2 do
+        [{_x1, x1}, {_x2, _x4}] = sets
+        val = (x1 + 1) * 4_000_000 + cur_y
+        {:halt, val}
+      else
+        {:cont, nil}
+      end
+    end)
   end
 
   def run do
@@ -90,7 +110,7 @@ defmodule Aoc202215 do
 
     IO.puts("Test Answer Part 1: #{inspect(part1(test_input, 10))}")
     IO.puts("Part 1: #{inspect(part1(input, 2_000_000))}")
-    # IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
-    # IO.puts("Part 2: #{inspect(part2(input))}")
+    IO.puts("Test Answer Part 2: #{inspect(part2(test_input, 20))}")
+    IO.puts("Part 2: #{inspect(part2(input, 4_000_000))}")
   end
 end
