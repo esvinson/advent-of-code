@@ -1,5 +1,5 @@
 defmodule Aoc202103 do
-  use Bitwise
+  import Bitwise
 
   def parse(input) do
     input
