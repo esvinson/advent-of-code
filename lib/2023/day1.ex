@@ -16,32 +16,32 @@ defmodule Aoc202301 do
     |> Enum.sum()
   end
 
-  def convert("", output), do: output
-  def convert("one" <> rest, output), do: convert("e" <> rest, output <> "1")
-  def convert("two" <> rest, output), do: convert("o" <> rest, output <> "2")
-  def convert("three" <> rest, output), do: convert("e" <> rest, output <> "3")
-  def convert("four" <> rest, output), do: convert("r" <> rest, output <> "4")
-  def convert("five" <> rest, output), do: convert("e" <> rest, output <> "5")
-  def convert("six" <> rest, output), do: convert("x" <> rest, output <> "6")
-  def convert("seven" <> rest, output), do: convert("n" <> rest, output <> "7")
-  def convert("eight" <> rest, output), do: convert("t" <> rest, output <> "8")
-  def convert("nine" <> rest, output), do: convert("e" <> rest, output <> "9")
+  def words_to_numbers("", output), do: output
+  def words_to_numbers("one" <> rest, output), do: words_to_numbers("e" <> rest, output <> "1")
+  def words_to_numbers("two" <> rest, output), do: words_to_numbers("o" <> rest, output <> "2")
+  def words_to_numbers("three" <> rest, output), do: words_to_numbers("e" <> rest, output <> "3")
+  def words_to_numbers("four" <> rest, output), do: words_to_numbers("r" <> rest, output <> "4")
+  def words_to_numbers("five" <> rest, output), do: words_to_numbers("e" <> rest, output <> "5")
+  def words_to_numbers("six" <> rest, output), do: words_to_numbers("x" <> rest, output <> "6")
+  def words_to_numbers("seven" <> rest, output), do: words_to_numbers("n" <> rest, output <> "7")
+  def words_to_numbers("eight" <> rest, output), do: words_to_numbers("t" <> rest, output <> "8")
+  def words_to_numbers("nine" <> rest, output), do: words_to_numbers("e" <> rest, output <> "9")
 
-  def convert(rest, output) do
+  def words_to_numbers(rest, output) do
     first = String.first(rest)
     rest = String.slice(rest, 1..-1)
 
     if String.match?(first, ~r/^\d/) do
-      convert(rest, output <> first)
+      words_to_numbers(rest, output <> first)
     else
-      convert(rest, output)
+      words_to_numbers(rest, output)
     end
   end
 
   def part2(rows) do
     rows
     |> Enum.map(fn row ->
-      numbers = convert(row, "")
+      numbers = words_to_numbers(row, "")
       String.to_integer(String.first(numbers) <> String.last(numbers))
     end)
     |> Enum.sum()
