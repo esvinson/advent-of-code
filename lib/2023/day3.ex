@@ -8,11 +8,13 @@ defmodule Aoc202303 do
       |> String.split("", trim: true)
       |> Enum.with_index()
       |> Enum.reduce(acc, fn {col, index_x}, acc2 ->
+        # exclude all . positions when building the map
         if col != ".", do: Map.put(acc2, {index_x, index_y}, col), else: acc2
       end)
     end)
   end
 
+  # return all the points in the surround 8 positions that existing in the map and are digits
   defp adjacent_numbers(map, {x, y}) do
     for(
       i <- -1..1,
@@ -42,6 +44,7 @@ defmodule Aoc202303 do
         unique_adjacent =
           adjacent_numbers(map, pos)
           |> Enum.map(&parent_position(map, &1))
+          # Deduplicate
           |> MapSet.new()
           |> MapSet.to_list()
 
@@ -64,6 +67,7 @@ defmodule Aoc202303 do
 
   defp part1(map) do
     map
+    # Find everything that's a symbol
     |> find_adjacent(~r/^[^\d]$/)
     |> Enum.reduce(0, fn {_, unique_adjacent}, acc ->
       sum =
@@ -77,6 +81,7 @@ defmodule Aoc202303 do
 
   defp part2(map) do
     map
+    # Find all *'s
     |> find_adjacent(~r/^\*$/)
     |> Enum.reduce(0, fn {_, unique_adjacent}, acc ->
       if Enum.count(unique_adjacent) > 1 do
