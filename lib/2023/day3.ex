@@ -94,9 +94,55 @@ defmodule Aoc202303 do
     |> Enum.sum()
   end
 
-  # defp part2(mapped_input) do
-  #   mapped_input
-  # end
+  defp adjacent_numbers(map, {x, y}) do
+    for(
+      i <- -1..1,
+      j <- -1..1,
+      x + i >= 0 and y + j >= 0 and {i, j} not in [{0, 0}] and Map.has_key?(map, {x + i, y + j}) and
+        Regex.match?(~r/^[\d]$/, Map.get(map, {x + i, y + j})),
+      do: {x + i, y + j}
+    )
+  end
+
+  defp parent_position(map, {x, y} = pos) do
+    if digit_to_left?(map, pos), do: parent_position(map, {x - 1, y}), else: pos
+  end
+
+  defp point_to_number(map, {x, y} = pos) do
+    if digit_to_right?(map, pos),
+      do: Map.get(map, pos) <> point_to_number(map, {x + 1, y}),
+      else: Map.get(map, pos)
+  end
+
+  defp gear_ratios(map) do
+    map
+    |> Map.keys()
+    |> Enum.sort(&point_sort/2)
+    |> Enum.reduce(0, fn pos, acc ->
+      if Regex.match?(~r/^\*$/, Map.get(map, pos)) do
+        unique_adjacent =
+          adjacent_numbers(map, pos)
+          |> Enum.map(&parent_position(map, &1))
+          |> MapSet.new()
+          |> MapSet.to_list()
+
+        if Enum.count(unique_adjacent) > 1 do
+          [i, j] = Enum.map(unique_adjacent, &String.to_integer(point_to_number(map, &1)))
+
+          acc + i * j
+        else
+          acc
+        end
+      else
+        acc
+      end
+    end)
+  end
+
+  defp part2(mapped_input) do
+    mapped_input
+    |> gear_ratios()
+  end
 
   def run() do
     test_input =
@@ -120,7 +166,7 @@ defmodule Aoc202303 do
 
     IO.puts("Test Answer Part 1: #{inspect(part1(test_input))}")
     IO.puts("Part 1: #{inspect(part1(input))}")
-    # IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
-    # IO.puts("Part 2: #{inspect(part2(input))}")
+    IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
+    IO.puts("Part 2: #{inspect(part2(input))}")
   end
 end
