@@ -8,7 +8,7 @@ defmodule Aoc202304 do
       [left, right] = String.split(rest, " | ", trim: true)
       left = String.split(left, " ", trim: true)
       right = String.split(right, " ", trim: true)
-      {card, {MapSet.new(left), MapSet.new(right)}}
+      {String.to_integer(card), {MapSet.new(left), MapSet.new(right)}}
     end)
   end
 
@@ -21,8 +21,36 @@ defmodule Aoc202304 do
     |> Enum.sum()
   end
 
-  defp part2(input) do
-    input
+  defp get_cache(map, cache, card) do
+    Map.get(cache, card)
+    |> case do
+      nil ->
+        {left, right} = Map.get(map, card)
+        val = MapSet.intersection(left, right) |> Enum.to_list() |> Enum.count()
+
+        new_card_numbers =
+          if val > 0, do: Range.to_list(Range.new(card + 1, card + val)), else: []
+
+        {Map.put(cache, card, new_card_numbers), new_card_numbers}
+
+      val ->
+        {cache, val}
+    end
+  end
+
+  defp process_cards(_map, _cache, [], output), do: output |> Map.values() |> Enum.sum()
+
+  defp process_cards(map, cache, [card | rest], output) do
+    {cache, new_cards} = get_cache(map, cache, card)
+    remaining = new_cards ++ rest
+    output = Map.update(output, card, 1, fn x -> x + 1 end)
+    process_cards(map, cache, remaining, output)
+  end
+
+  defp part2(cards) do
+    card_map = Map.new(cards)
+    card_list = Map.keys(card_map) |> Enum.sort()
+    process_cards(card_map, %{}, card_list, %{})
   end
 
   def run() do
@@ -43,7 +71,7 @@ defmodule Aoc202304 do
 
     IO.puts("Test Answer Part 1: #{inspect(part1(test_input))}")
     IO.puts("Part 1: #{inspect(part1(input))}")
-    # IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
-    # IO.puts("Part 2: #{inspect(part2(input))}")
+    IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
+    IO.puts("Part 2: #{inspect(part2(input))}")
   end
 end
