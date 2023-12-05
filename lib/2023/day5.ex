@@ -59,9 +59,53 @@ defmodule Aoc202305 do
     |> Enum.min()
   end
 
-  # defp part2(input) do
-  #   input
-  # end
+  defp unmap({destination, source_start, source_range}, find_val)
+       when find_val >= destination and find_val - destination < source_range,
+       do: source_start + (find_val - destination)
+
+  defp unmap(_, _find_val), do: false
+
+  defp iterate(location, seed_ranges, mappings) do
+    seed_value =
+      order()
+      |> Enum.reverse()
+      |> Enum.reduce(location, fn map_id, starting_value ->
+        Enum.reduce_while(mappings[map_id], starting_value, fn map, value_to_map ->
+          unmap(map, value_to_map)
+          |> case do
+            false ->
+              {:cont, value_to_map}
+
+            val ->
+              {:halt, val}
+          end
+        end)
+      end)
+
+    valid_seed? =
+      Enum.reduce_while(seed_ranges, false, fn {min, max}, _acc ->
+        if seed_value >= min and seed_value <= max do
+          {:halt, true}
+        else
+          {:cont, false}
+        end
+      end)
+
+    if valid_seed? do
+      location
+    else
+      iterate(location + 1, seed_ranges, mappings)
+    end
+  end
+
+  defp part2({seeds, mappings}) do
+    seed_ranges =
+      seeds
+      |> Enum.chunk_every(2)
+      |> Enum.reduce([], fn [seed, count], acc -> [{seed, seed + count}] ++ acc end)
+
+    iterate(1, seed_ranges, mappings)
+  end
 
   def run() do
     test_input =
@@ -108,7 +152,7 @@ defmodule Aoc202305 do
 
     IO.puts("Test Answer Part 1: #{inspect(part1(test_input))}")
     IO.puts("Part 1: #{inspect(part1(input))}")
-    # IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
-    # IO.puts("Part 2: #{inspect(part2(input))}")
+    IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
+    IO.puts("Part 2: #{inspect(part2(input))}")
   end
 end
