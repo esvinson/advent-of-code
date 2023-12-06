@@ -6,29 +6,26 @@ defmodule Aoc202306 do
      String.split(distances, " ", trim: true) |> Enum.map(&String.to_integer/1)}
   end
 
+  defp count_best(time, distance) do
+    Enum.reduce(0..(time - 1), 0, fn hold, acc ->
+      val = (time - hold) * hold
+
+      if val > distance do
+        acc + 1
+      else
+        acc
+      end
+    end)
+  end
+
   defp process({[], []}), do: []
 
   defp process({[time | times], [distance | distances]}) do
-    count =
-      Enum.reduce(0..(time - 1), [], fn hold, acc ->
-        val = (time - hold) * hold
-
-        if val > distance do
-          [time] ++ acc
-        else
-          acc
-        end
-      end)
-      |> Enum.count()
-
-    [count] ++ process({times, distances})
+    [count_best(time, distance)] ++ process({times, distances})
   end
 
   defp part1(input) do
-    [first | rest] =
-      input
-      |> process()
-
+    [first | rest] = process(input)
     Enum.reduce(rest, first, fn x, acc -> acc * x end)
   end
 
@@ -36,17 +33,7 @@ defmodule Aoc202306 do
     {times, distances} = input
     time = times |> Enum.join("") |> String.to_integer()
     distance = distances |> Enum.join("") |> String.to_integer()
-
-    Enum.reduce(0..(time - 1), [], fn hold, acc ->
-      val = (time - hold) * hold
-
-      if val > distance do
-        [time] ++ acc
-      else
-        acc
-      end
-    end)
-    |> Enum.count()
+    count_best(time, distance)
   end
 
   def run() do
