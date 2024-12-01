@@ -38,50 +38,65 @@ defmodule Aoc202313 do
     end
   end
 
-  defp part1(input) do
-    %{rows: y, cols: x} =
-      input
-      |> Enum.map(fn set ->
-        total_rows = Enum.count(set)
-
-        rows =
-          set
-          |> Enum.with_index()
-          |> Enum.reduce(%{}, fn {row, key}, acc ->
-            Map.put(acc, key, row)
-          end)
-
-        total_cols = Map.get(rows, 0, []) |> Enum.count()
-
-        cols =
-          set
-          |> Enum.with_index()
-          |> Enum.reduce(%{}, fn {row, _key}, acc ->
-            row
-            |> Enum.with_index()
-            |> Enum.reduce(acc, fn {col, subkey}, subacc ->
-              new_val = Map.get(subacc, subkey, []) ++ [col]
-              Map.put(subacc, subkey, new_val)
-            end)
-          end)
-
-        {total_rows, total_cols, rows, cols}
-      end)
-      |> Enum.reduce(%{rows: 0, cols: 0}, fn {total_rows, total_cols, rows, cols},
-                                             %{rows: row_val, cols: col_val} = acc ->
-        val = find_mirror(total_rows - 1, rows)
-
-        if val,
-          do: Map.put(acc, :rows, row_val + val),
-          else: Map.put(acc, :cols, col_val + find_mirror(total_cols - 1, cols))
-      end)
+  defp part1(mirrors) do
+    %{rows: y, cols: x} = iterate(mirrors)
 
     y * 100 + x
   end
 
-  # defp part2(input) do
-  #   input
-  # end
+  defp map_mirrors(mirrors) do
+    mirrors
+    |> Enum.map(fn set ->
+      total_rows = Enum.count(set)
+
+      rows =
+        set
+        |> Enum.with_index()
+        |> Enum.reduce(%{}, fn {row, key}, acc ->
+          Map.put(acc, key, row)
+        end)
+
+      total_cols = Map.get(rows, 0, []) |> Enum.count()
+
+      cols =
+        set
+        |> Enum.with_index()
+        |> Enum.reduce(%{}, fn {row, _key}, acc ->
+          row
+          |> Enum.with_index()
+          |> Enum.reduce(acc, fn {col, subkey}, subacc ->
+            new_val = Map.get(subacc, subkey, []) ++ [col]
+            Map.put(subacc, subkey, new_val)
+          end)
+        end)
+
+      {total_rows, total_cols, rows, cols}
+    end)
+  end
+
+  defp iterate(mirrors) do
+    mirrors
+    |> map_mirrors()
+    |> Enum.reduce(%{rows: 0, cols: 0}, fn {total_rows, total_cols, rows, cols},
+                                           %{rows: row_val, cols: col_val} = acc ->
+      val = find_mirror(total_rows - 1, rows)
+
+      if val,
+        do: Map.put(acc, :rows, row_val + val),
+        else: Map.put(acc, :cols, col_val + find_mirror(total_cols - 1, cols))
+    end)
+  end
+
+  defp part2(mirrors) do
+    mirrors
+    |> map_mirrors()
+    |> Enum.map(fn {rows, cols, _, _} ->
+      rows * cols
+    end)
+    |> Enum.sum()
+
+    # %{rows: original_y, cols: original_x} = iterate(mirrors)
+  end
 
   def run() do
     test_input =
@@ -110,7 +125,7 @@ defmodule Aoc202313 do
 
     IO.puts("Test Answer Part 1: #{inspect(part1(test_input))}")
     IO.puts("Part 1: #{inspect(part1(input))}")
-    # IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
+    IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
     # IO.puts("Part 2: #{inspect(part2(input))}")
   end
 end
