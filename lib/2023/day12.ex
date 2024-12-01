@@ -95,7 +95,7 @@ defmodule Aoc202312 do
     test_input2 = parse2(test)
 
     input_raw = Advent.daily_input("2023", "12")
-    input = parse(input_raw)
+    _input = parse(input_raw)
     input2 = parse2(input_raw)
 
     IO.puts("Test Answer Part 1: #{inspect(part1(test_input))}")

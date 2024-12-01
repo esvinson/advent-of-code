@@ -68,9 +68,9 @@ defmodule Aoc202205 do
     # [Z] [M] [P]
     #  1   2   3
     test_start = %{
-      1 => 'NZ',
-      2 => 'DCM',
-      3 => 'P'
+      1 => ~c"NZ",
+      2 => ~c"DCM",
+      3 => ~c"P"
     }
 
     test_input =
@@ -83,15 +83,15 @@ defmodule Aoc202205 do
       |> parse
 
     start = %{
-      1 => 'DHRZSPWQ',
-      2 => 'FHQWRBV',
-      3 => 'HSVC',
-      4 => 'GFH',
-      5 => 'ZBJGP',
-      6 => 'LFWHJTQ',
-      7 => 'NJVLDWTZ',
-      8 => 'FHGJCZTD',
-      9 => 'HBMVPW'
+      1 => ~c"DHRZSPWQ",
+      2 => ~c"FHQWRBV",
+      3 => ~c"HSVC",
+      4 => ~c"GFH",
+      5 => ~c"ZBJGP",
+      6 => ~c"LFWHJTQ",
+      7 => ~c"NJVLDWTZ",
+      8 => ~c"FHGJCZTD",
+      9 => ~c"HBMVPW"
     }
 
     input =

@@ -112,7 +112,9 @@ defmodule Advent.Day17 do
     # B=L,10,L,8,R,12
     # C=L,8,L,10,L,6,L,6
     input =
-      make_list('A,B,A,C,B,C,B,A,C,B\nL,6,R,8,R,12,L,6,L,8\nL,10,L,8,R,12\nL,8,L,10,L,6,L,6\nN\n')
+      make_list(
+        ~c"A,B,A,C,B,C,B,A,C,B\nL,6,R,8,R,12,L,6,L,8\nL,10,L,8,R,12\nL,8,L,10,L,6,L,6\nN\n"
+      )
 
     Advent.daily_input(17)
     |> parse_input()

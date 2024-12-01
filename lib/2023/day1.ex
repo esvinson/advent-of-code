@@ -29,7 +29,7 @@ defmodule Aoc202301 do
 
   def words_to_numbers(rest, output) do
     first = String.first(rest)
-    rest = String.slice(rest, 1..-1)
+    rest = String.slice(rest, 1..-1//1)
 
     if String.match?(first, ~r/^\d/) do
       words_to_numbers(rest, output <> first)

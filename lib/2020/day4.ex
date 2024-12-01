@@ -78,7 +78,7 @@ defmodule Aoc202004 do
 
     height_invalid? =
       case height |> String.reverse() |> String.to_charlist() do
-        'mc' ++ cm_height_rev ->
+        ~c"mc" ++ cm_height_rev ->
           cm_height =
             cm_height_rev
             |> Enum.reverse()
@@ -87,7 +87,7 @@ defmodule Aoc202004 do
 
           cm_height < 150 || cm_height > 193
 
-        'ni' ++ inch_height_rev ->
+        ~c"ni" ++ inch_height_rev ->
           inch_height =
             inch_height_rev
             |> Enum.reverse()

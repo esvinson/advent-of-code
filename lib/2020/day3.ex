@@ -23,7 +23,7 @@ defmodule Aoc202003 do
 
   def part1(list) do
     len = list |> Enum.at(0) |> Enum.count()
-    hash = '#' |> Enum.at(0)
+    hash = ~c"#" |> Enum.at(0)
 
     list
     |> Enum.drop(1)
@@ -48,7 +48,7 @@ defmodule Aoc202003 do
 
   def part2(list) do
     len = list |> Enum.at(0) |> Enum.count()
-    hash = '#' |> Enum.at(0)
+    hash = ~c"#" |> Enum.at(0)
 
     [
       {1, 1},
