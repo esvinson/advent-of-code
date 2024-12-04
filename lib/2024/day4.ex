@@ -125,9 +125,27 @@ defmodule Aoc202404 do
     Map.get(results, "XMAS")
   end
 
-  # defp part2(input) do
-  #   input
-  # end
+  defp part2(%{map: map, width: width, height: height}) do
+    positions = for x <- 1..(width - 2), y <- 1..(height - 2), do: {x, y}
+
+    Enum.reduce(positions, 0, fn {x, y} = pos, acc ->
+      if Map.get(map, pos) == "A" do
+        nw = Map.get(map, {x - 1, y - 1})
+        ne = Map.get(map, {x + 1, y - 1})
+        sw = Map.get(map, {x - 1, y + 1})
+        se = Map.get(map, {x + 1, y + 1})
+
+        if ((nw == "M" && se == "S") or (nw == "S" && se == "M")) and
+             ((ne == "M" && sw == "S") or (ne == "S" && sw == "M")) do
+          acc + 1
+        else
+          acc
+        end
+      else
+        acc
+      end
+    end)
+  end
 
   def run() do
     test_input =
@@ -151,7 +169,7 @@ defmodule Aoc202404 do
 
     IO.puts("Test Answer Part 1: #{inspect(part1(test_input))}")
     IO.puts("Part 1: #{inspect(part1(input))}")
-    # IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
-    # IO.puts("Part 2: #{inspect(part2(input))}")
+    IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
+    IO.puts("Part 2: #{inspect(part2(input))}")
   end
 end
