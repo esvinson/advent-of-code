@@ -63,9 +63,50 @@ defmodule Aoc202406 do
     |> MapSet.size()
   end
 
-  # defp part2(input) do
-  #   input
-  # end
+  defp has_loop?(_map, {x, y}, _direction, width, height, _visited)
+       when x < 0 or y < 0 or x == width or y == height,
+       do: false
+
+  defp has_loop?(map, pos, direction, width, height, visited) do
+    if MapSet.member?(visited, {pos, direction}) do
+      true
+    else
+      next = next_position(pos, direction)
+
+      if is_wall?(map, next) do
+        has_loop?(map, pos, turn(direction), width, height, visited)
+      else
+        has_loop?(map, next, direction, width, height, MapSet.put(visited, {pos, direction}))
+      end
+    end
+  end
+
+  defp part2(%{map: map, width: width, height: height}) do
+    start = Map.get(map, :start)
+
+    barrier_options =
+      for x <- 0..(width - 1),
+          y <- 0..(height - 1),
+          {x, y} != start,
+          not is_wall?(map, {x, y}),
+          do: {x, y}
+
+    Enum.reduce(barrier_options, 0, fn barrier, acc ->
+      looping? =
+        map
+        |> Map.put(barrier, "#")
+        |> has_loop?(start, :north, width, height, MapSet.new([]))
+
+      if looping? do
+        acc + 1
+      else
+        acc
+      end
+    end)
+
+    # traverse(map, start, :north, width, height, MapSet.new([]))
+    # |> MapSet.size()
+  end
 
   def run() do
     test_input =
@@ -88,8 +129,8 @@ defmodule Aoc202406 do
       |> parse()
 
     IO.puts("Test Answer Part 1: #{inspect(part1(test_input))}")
-    IO.puts("Part 1: #{inspect(part1(input))}")
-    # IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
-    # IO.puts("Part 2: #{inspect(part2(input))}")
+    IO.puts("Part 2: #{inspect(part1(input))}")
+    IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
+    IO.puts("Part 2: #{inspect(part2(input))}")
   end
 end
