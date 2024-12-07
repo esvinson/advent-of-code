@@ -22,9 +22,9 @@
 #     #   Advent.daily_input("2024", "##")
 #     #   |> parse()
 
-#     IO.puts("Test Answer Part 1: #{inspect(part1(test_input))}")
-#     # IO.puts("Part 1: #{inspect(part1(input))}")
-#     # IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
-#     # IO.puts("Part 2: #{inspect(part2(input))}")
+#     IO.puts("Test Answer Part 1: #{inspect(part1(test_input), charlists: :as_lists)}")
+#     # IO.puts("Part 1: #{inspect(part1(input), charlists: :as_lists)}")
+#     # IO.puts("Test Answer Part 2: #{inspect(part2(test_input), charlists: :as_lists)}")
+#     # IO.puts("Part 2: #{inspect(part2(input), charlists: :as_lists)}")
 #   end
 # end
