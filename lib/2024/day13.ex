@@ -67,9 +67,12 @@ defmodule Aoc202413 do
     |> Enum.sum()
   end
 
-  # defp part2(input) do
-  #   input
-  # end
+  defp part2(input) do
+    input
+
+    # 8400 = (a * 94) + (b * 22)
+    # 5400 = (a * 34) + (b * 67)
+  end
 
   def run() do
     test_input =
@@ -98,7 +101,7 @@ defmodule Aoc202413 do
 
     IO.puts("Test Answer Part 1: #{inspect(part1(test_input), charlists: :as_lists)}")
     IO.puts("Part 1: #{inspect(part1(input), charlists: :as_lists)}")
-    # IO.puts("Test Answer Part 2: #{inspect(part2(test_input), charlists: :as_lists)}")
+    IO.puts("Test Answer Part 2: #{inspect(part2(test_input), charlists: :as_lists)}")
     # IO.puts("Part 2: #{inspect(part2(input), charlists: :as_lists)}")
   end
 end
