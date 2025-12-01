@@ -3,9 +3,8 @@ defmodule Aoc202501 do
     input
     |> String.split("\n", trim: true)
     |> Enum.map(fn row ->
-      direction = String.at(row, 0)
-      number = String.replace(row, ~r"^[RL]", "")
-      {direction, String.to_integer(number)}
+      {direction, numstr} = String.split_at(row, 1)
+      {direction, String.to_integer(numstr)}
     end)
   end
 
