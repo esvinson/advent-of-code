@@ -8,7 +8,7 @@ defmodule Aoc202503 do
   defp find_biggest([], max1, max2), do: [max1, max2]
 
   defp find_biggest([a | rest], max1, max2) do
-    if a > max1 do
+    if a >= max1 do
       find_biggest(rest, a, max1)
     else
       if Enum.find(rest, false, fn x -> x == max1 end) do
