@@ -47,9 +47,83 @@ defmodule Aoc202502 do
     |> Enum.sum()
   end
 
-  # defp part2(input) do
-  #   input
-  # end
+  defp do_step2(a, b, prefix, prefix_len, length, result) do
+    val =
+      "#{prefix}"
+      |> String.duplicate(Integer.floor_div(length, prefix_len))
+      |> String.to_integer()
+
+    if not inrange(a, b, val) && val > a do
+      result
+    else
+      if val < a do
+        do_step2(a, b, prefix + 1, prefix_len, length, result)
+      else
+        do_step2(a, b, prefix + 1, prefix_len, length, [val] ++ result)
+      end
+    end
+  end
+
+  defp check_ranges2([a, b]) do
+    lena = max(String.length(a), 2)
+    lenb = max(String.length(b), 2)
+    aval = String.to_integer(a)
+    bval = String.to_integer(b)
+
+    halfa = Integer.floor_div(lena, 2)
+    halfb = Integer.floor_div(lenb, 2)
+
+    prefixesa =
+      for i <- 1..halfa,
+          Integer.mod(lena, i) == 0,
+          do: {i, String.to_integer(String.slice(a, 0, i))}
+
+    prefixesb =
+      for i <- 1..halfb,
+          Integer.mod(lenb, i) == 0,
+          do: {i, Integer.pow(10, i - 1)}
+
+    {a, b, lena, prefixesa, lenb, prefixesb} |> IO.inspect(charlists: :as_lists)
+
+    if lena != lenb do
+      Enum.map(prefixesa, fn {perfix_len, prefix} ->
+        do_step2(
+          aval,
+          Integer.pow(10, String.length("#{aval}") + 1),
+          prefix,
+          perfix_len,
+          lena,
+          []
+        )
+      end) ++
+        Enum.map(prefixesb, fn {perfix_len, prefix} ->
+          do_step2(
+            Integer.pow(10, String.length("#{bval}") - 1),
+            bval,
+            prefix,
+            perfix_len,
+            lenb,
+            []
+          )
+        end)
+    else
+      Enum.map(prefixesa, fn {perfix_len, prefix} ->
+        do_step2(aval, bval, prefix, perfix_len, lena, [])
+      end)
+    end
+    |> List.flatten()
+    # Dedupe only works properly on sorted lists
+    |> Enum.sort()
+    |> Enum.dedup()
+    |> IO.inspect(label: "#{a}-#{b}:", charlists: :as_lists)
+  end
+
+  defp part2(ranges) do
+    ranges
+    |> Enum.map(&check_ranges2/1)
+    |> List.flatten()
+    |> Enum.sum()
+  end
 
   def run() do
     test_input =
@@ -63,7 +137,9 @@ defmodule Aoc202502 do
     IO.puts("Test Answer Part 1: #{inspect(part1(test_input))}")
     # Not: 32955068316 (low)
     IO.puts("Part 1: #{inspect(part1(input))}")
-    # IO.puts("Test Answer Part 2: #{inspect(part2(test_input))}")
-    # IO.puts("Part 2: #{inspect(part2(input))}")
+    IO.puts("Test Answer Part 2: #{inspect(part2(test_input), charlists: :as_lists)}")
+    # IO.puts("Test Answer Part 2: #{inspect(part2(parse("942-1466")), charlists: :as_lists)}")
+    # Not 45947814543 (high), not 45763967685 (low)
+    IO.puts("Part 2: #{inspect(part2(input))}")
   end
 end
