@@ -83,8 +83,6 @@ defmodule Aoc202502 do
           Integer.mod(lenb, i) == 0,
           do: {i, Integer.pow(10, i - 1)}
 
-    {a, b, lena, prefixesa, lenb, prefixesb} |> IO.inspect(charlists: :as_lists)
-
     if lena != lenb do
       Enum.map(prefixesa, fn {perfix_len, prefix} ->
         do_step2(
@@ -115,7 +113,6 @@ defmodule Aoc202502 do
     # Dedupe only works properly on sorted lists
     |> Enum.sort()
     |> Enum.dedup()
-    |> IO.inspect(label: "#{a}-#{b}:", charlists: :as_lists)
   end
 
   defp part2(ranges) do
