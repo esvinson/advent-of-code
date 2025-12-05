@@ -5,63 +5,48 @@ defmodule Aoc202503 do
     |> Enum.map(fn x -> String.split(x, "", trim: true) |> Enum.map(&String.to_integer/1) end)
   end
 
-  defp find_biggest([], max1, max2), do: [max1, max2]
+  # Reworked with inspirtion from jollyjerr's implementation: https://github.com/jollyjerr/advent-of-code/blob/main/2025/3/main.c
+  defp search(_bank, _len, _start, digits, output)
+       when length(output) == digits,
+       do: Integer.undigits(Enum.reverse(output))
 
-  defp find_biggest([a | rest], max1, max2) do
-    if a >= max1 do
-      find_biggest(rest, a, max1)
-    else
-      if Enum.find(rest, false, fn x -> x == max1 end) do
-        if a > max2 do
-          find_biggest(rest, max1, a)
-        else
-          find_biggest(rest, max1, max2)
-        end
-      else
-        find_biggest(rest, max1, max2)
-      end
-    end
+  defp search(bank, len, start, digits, output) do
+    bank_length = Enum.count(bank)
+    output_length = Enum.count(output)
+
+    {max_index, max_val} =
+      bank
+      |> Enum.slice(start, len + 1 - start)
+      |> Enum.max_by(fn {index, element} ->
+        {element, index * -1}
+      end)
+
+    search(
+      bank,
+      bank_length - (digits - (output_length + 1)),
+      max_index + 1,
+      digits,
+      [max_val] ++ output
+    )
   end
 
-  defp part1(banks) do
+  defp sum_banks(banks, digits) do
     Enum.map(banks, fn bank ->
-      # IO.inspect(bank, label: "bank ===>", printable_limit: :infinity, limit: :infinity)
-      rbank = Enum.reverse(bank)
-      [first | rest] = rbank
-      [a, b] = find_biggest(rbank, 0, 0)
-      [a, b] = if b == 0, do: [List.first(find_biggest(rest, 0, 0)), first], else: [a, b]
+      len = Enum.count(bank)
 
-      Integer.undigits([a, b])
-      # |> IO.inspect(label: "RESULT ===>")
+      bank
+      |> Enum.with_index(fn element, index -> {index, element} end)
+      |> search(len - digits, 0, digits, [])
     end)
     |> Enum.sum()
   end
 
-  defp rank_and_file(bank, how_many) do
-    bank
-    |> Enum.with_index(fn element, index -> {index, element} end)
-    |> Enum.chunk_while([], fn element, acc -> nil end, fn
-      [] -> {:cont, []}
-      acc -> {:cont, acc, []}
-    end)
-    |> Enum.map(fn chunk ->
-      chunk
-      |> IO.inspect()
-      |> Enum.sort_by(fn {first, second} -> {second, first} end, :desc)
-      |> Enum.take(how_many)
-      |> Enum.sort()
-      |> Enum.map(&elem(&1, 1))
-      |> Integer.undigits()
-    end)
-    |> Enum.max()
+  defp part1(banks) do
+    sum_banks(banks, 2)
   end
 
   defp part2(banks) do
-    Enum.map(banks, fn bank ->
-      rank_and_file(bank, 2)
-    end)
-
-    # |> Enum.sum()
+    sum_banks(banks, 12)
   end
 
   def run() do
@@ -86,6 +71,6 @@ defmodule Aoc202503 do
       "Test Answer Part 2 (3121910778619): #{inspect(part2(test_input), charlists: :as_lists)}"
     )
 
-    # IO.puts("Part 2: #{inspect(part2(input), charlists: :as_lists)}")
+    IO.puts("Part 2: #{inspect(part2(input), charlists: :as_lists)}")
   end
 end
