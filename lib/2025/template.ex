@@ -19,7 +19,7 @@
 #       |> parse()
 
 #     # input =
-#     #   Advent.daily_input("2024", "##")
+#     #   Advent.daily_input("2025", "##")
 #     #   |> parse()
 
 #     IO.puts("Test Answer Part 1: #{inspect(part1(test_input), charlists: :as_lists)}")

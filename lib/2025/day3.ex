@@ -37,9 +37,32 @@ defmodule Aoc202503 do
     |> Enum.sum()
   end
 
-  # defp part2(input) do
-  #   input
-  # end
+  defp rank_and_file(bank, how_many) do
+    bank
+    |> Enum.with_index(fn element, index -> {index, element} end)
+    |> Enum.chunk_while([], fn element, acc -> nil end, fn
+      [] -> {:cont, []}
+      acc -> {:cont, acc, []}
+    end)
+    |> Enum.map(fn chunk ->
+      chunk
+      |> IO.inspect()
+      |> Enum.sort_by(fn {first, second} -> {second, first} end, :desc)
+      |> Enum.take(how_many)
+      |> Enum.sort()
+      |> Enum.map(&elem(&1, 1))
+      |> Integer.undigits()
+    end)
+    |> Enum.max()
+  end
+
+  defp part2(banks) do
+    Enum.map(banks, fn bank ->
+      rank_and_file(bank, 2)
+    end)
+
+    # |> Enum.sum()
+  end
 
   def run() do
     test_input =
@@ -58,7 +81,11 @@ defmodule Aoc202503 do
     IO.puts("Test Answer Part 1 (357): #{inspect(part1(test_input), charlists: :as_lists)}")
     # Not 17073, Not 17208
     IO.puts("Part 1: #{inspect(part1(input), charlists: :as_lists)}")
-    # IO.puts("Test Answer Part 2: #{inspect(part2(test_input), charlists: :as_lists)}")
+
+    IO.puts(
+      "Test Answer Part 2 (3121910778619): #{inspect(part2(test_input), charlists: :as_lists)}"
+    )
+
     # IO.puts("Part 2: #{inspect(part2(input), charlists: :as_lists)}")
   end
 end
