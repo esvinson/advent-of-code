@@ -49,9 +49,23 @@ defmodule Aoc202507 do
     count
   end
 
-  # defp part2(input) do
-  #   input
-  # end
+  defp traverse(0, _), do: 0
+  defp traverse(_beams, []), do: 1
+
+  defp traverse(beams, [row | rest]) do
+    hits = band(beams, row)
+    left_beams = hits <<< 1
+    remaining_existing_beams = bxor(beams, hits)
+    right_beams = hits >>> 1
+
+    traverse(remaining_existing_beams, rest) + traverse(left_beams, rest) +
+      traverse(right_beams, rest)
+  end
+
+  defp part2(tree) do
+    {start, rest} = tree_to_binary(tree)
+    traverse(start, rest)
+  end
 
   def run() do
     test_input =
@@ -81,7 +95,7 @@ defmodule Aoc202507 do
 
     IO.puts("Test Answer Part 1 (21): #{inspect(part1(test_input), charlists: :as_lists)}")
     IO.puts("Part 1: #{inspect(part1(input), charlists: :as_lists)}")
-    # IO.puts("Test Answer Part 2: #{inspect(part2(test_input), charlists: :as_lists)}")
-    # IO.puts("Part 2: #{inspect(part2(input), charlists: :as_lists)}")
+    IO.puts("Test Answer Part 2 (40): #{inspect(part2(test_input), charlists: :as_lists)}")
+    IO.puts("Part 2: #{inspect(part2(input), charlists: :as_lists)}")
   end
 end
