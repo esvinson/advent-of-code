@@ -49,22 +49,80 @@ defmodule Aoc202507 do
     count
   end
 
-  defp traverse(0, _), do: 0
-  defp traverse(_beams, []), do: 1
+  defp calc_beam_start(0, _offset, map), do: map
 
-  defp traverse(beams, [row | rest]) do
+  defp calc_beam_start(beams, offset, map) do
+    x = beams &&& 1
+
+    if x > 0 do
+      new_map = Map.put(map, offset, 1)
+      calc_beam_start(beams >>> 1, offset + 1, new_map)
+    else
+      calc_beam_start(beams >>> 1, offset + 1, map)
+    end
+  end
+
+  defp calc_beams_left(0, _offset, map), do: map
+
+  defp calc_beams_left(beams, offset, map) do
+    x = beams &&& 1
+
+    if x > 0 do
+      current = Map.get(map, offset, 0)
+      source = Map.get(map, offset - 1, 0)
+      new_map = Map.put(map, offset, current + source)
+      calc_beams_left(beams >>> 1, offset + 1, new_map)
+    else
+      calc_beams_left(beams >>> 1, offset + 1, map)
+    end
+  end
+
+  defp calc_beams_right(0, _offset, map), do: map
+
+  defp calc_beams_right(beams, offset, map) do
+    x = beams &&& 1
+
+    if x > 0 do
+      current = Map.get(map, offset, 0)
+      source = Map.get(map, offset + 1, 0)
+      new_map = Map.put(map, offset, current + source)
+      calc_beams_right(beams >>> 1, offset + 1, new_map)
+    else
+      calc_beams_right(beams >>> 1, offset + 1, map)
+    end
+  end
+
+  defp clear_hit_beams(0, _offset, map), do: map
+
+  defp clear_hit_beams(beams, offset, map) do
+    x = beams &&& 1
+
+    if x > 0 do
+      clear_hit_beams(beams >>> 1, offset + 1, Map.put(map, offset, 0))
+    else
+      clear_hit_beams(beams >>> 1, offset + 1, map)
+    end
+  end
+
+  defp traverse(0, _, _), do: 0
+  defp traverse(_beams, [], map), do: Enum.sum(Map.values(map))
+
+  defp traverse(beams, [row | rest], map) do
     hits = band(beams, row)
     left_beams = hits <<< 1
-    remaining_existing_beams = bxor(beams, hits)
     right_beams = hits >>> 1
+    map = calc_beams_left(left_beams, 0, map)
+    map = calc_beams_right(right_beams, 0, map)
+    map = clear_hit_beams(hits, 0, map)
+    new_beams = bor(bxor(beams, hits), bor(hits <<< 1, hits >>> 1))
 
-    traverse(remaining_existing_beams, rest) + traverse(left_beams, rest) +
-      traverse(right_beams, rest)
+    traverse(new_beams, rest, map)
   end
 
   defp part2(tree) do
     {start, rest} = tree_to_binary(tree)
-    traverse(start, rest)
+
+    traverse(start, rest, calc_beam_start(start, 0, %{}))
   end
 
   def run() do
