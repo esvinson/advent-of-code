@@ -95,7 +95,9 @@ defmodule Aoc202508 do
                 end
 
               output_set =
-                if MapSet.member?(set, p1) or MapSet.member?(set, p2), do: acc, else: [set] ++ acc
+                if MapSet.member?(set, p1) or MapSet.member?(set, p2),
+                  do: acc,
+                  else: [set] ++ acc
 
               {p1set, p2set, output_set}
             end)
@@ -119,9 +121,116 @@ defmodule Aoc202508 do
     |> Enum.reduce(1, fn x, acc -> x * acc end)
   end
 
-  # defp part2(input) do
-  #   input
-  # end
+  defp part2(points) do
+    single_set = MapSet.new(points)
+
+    {{x1, _, _}, {x2, _, _}} =
+      points
+      |> build_list()
+      |> Enum.sort()
+      |> link2([], single_set)
+
+    x1 * x2
+  end
+
+  defp link2([], _sets, _single_set), do: nil
+
+  defp link2([{_distance, p1, p2} | points], sets, single_set) do
+    if MapSet.member?(single_set, p1) && MapSet.member?(single_set, p2) do
+      new_single_set =
+        single_set
+        |> MapSet.delete(p1)
+        |> MapSet.delete(p2)
+
+      new_set = MapSet.new([p1, p2])
+      new_sets = [new_set] ++ sets
+
+      if length(new_sets) == 1 && MapSet.size(new_single_set) == 0 do
+        {p1, p2}
+      else
+        link2(points, new_sets, new_single_set)
+      end
+    else
+      if MapSet.member?(single_set, p1) do
+        # p2 is in a set, p1 is not
+        new_single_set =
+          single_set
+          |> MapSet.delete(p1)
+
+        new_sets =
+          Enum.reduce(sets, [], fn set, acc ->
+            updated_set =
+              if MapSet.member?(set, p2) do
+                MapSet.put(set, p1)
+              else
+                set
+              end
+
+            [updated_set] ++ acc
+          end)
+
+        if length(new_sets) == 1 && MapSet.size(new_single_set) == 0 do
+          {p1, p2}
+        else
+          link2(points, new_sets, new_single_set)
+        end
+      else
+        if MapSet.member?(single_set, p2) do
+          new_single_set =
+            single_set
+            |> MapSet.delete(p2)
+
+          # p1 is in a set, p2 is not
+          new_sets =
+            Enum.reduce(sets, [], fn set, acc ->
+              updated_set =
+                if MapSet.member?(set, p1) do
+                  MapSet.put(set, p2)
+                else
+                  set
+                end
+
+              [updated_set] ++ acc
+            end)
+
+          if length(new_sets) == 1 && MapSet.size(new_single_set) == 0 do
+            {p1, p2}
+          else
+            link2(points, new_sets, new_single_set)
+          end
+        else
+          # both in sets
+          {p1set, p2set, new_sets} =
+            Enum.reduce(sets, {nil, nil, []}, fn set, {p1set, p2set, acc} ->
+              p1set =
+                if MapSet.member?(set, p1) do
+                  set
+                else
+                  p1set
+                end
+
+              p2set =
+                if MapSet.member?(set, p2) do
+                  set
+                else
+                  p2set
+                end
+
+              output_set =
+                if MapSet.member?(set, p1) or MapSet.member?(set, p2), do: acc, else: [set] ++ acc
+
+              {p1set, p2set, output_set}
+            end)
+
+          if length(new_sets) == 0 && MapSet.size(single_set) == 0 do
+            {p1, p2}
+          else
+            link2(points, [MapSet.union(p1set, p2set)] ++ new_sets, single_set)
+          end
+        end
+      end
+    end
+  end
 
   def run() do
     test_input =
@@ -155,7 +264,7 @@ defmodule Aoc202508 do
 
     IO.puts("Test Answer Part 1: #{inspect(part1(test_input, 10), charlists: :as_lists)}")
     IO.puts("Part 1: #{inspect(part1(input, 1000), charlists: :as_lists)}")
-    # IO.puts("Test Answer Part 2: #{inspect(part2(test_input), charlists: :as_lists)}")
-    # IO.puts("Part 2: #{inspect(part2(input), charlists: :as_lists)}")
+    IO.puts("Test Answer Part 2 (25272): #{inspect(part2(test_input), charlists: :as_lists)}")
+    IO.puts("Part 2: #{inspect(part2(input), charlists: :as_lists)}")
   end
 end
